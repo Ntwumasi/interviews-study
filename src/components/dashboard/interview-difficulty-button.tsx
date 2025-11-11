@@ -26,39 +26,28 @@ export function InterviewDifficultyButton({
     console.log('Navigating to:', url)
     console.log('Full URL will be:', window.location.origin + url)
 
-    // Track interview click event (non-blocking)
-    try {
-      trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
-        type,
-        difficulty,
-        location: 'dashboard',
-      })
-    } catch (error) {
-      console.error('Analytics tracking error (non-blocking):', error)
-    }
+    // TEMPORARILY DISABLED: Track interview click event
+    // try {
+    //   trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
+    //     type,
+    //     difficulty,
+    //     location: 'dashboard',
+    //   })
+    // } catch (error) {
+    //   console.error('Analytics tracking error (non-blocking):', error)
+    // }
 
     // Use window.location for full page navigation to ensure query params are sent
-    console.log('About to set window.location.href...')
+    console.log('About to navigate (PostHog tracking disabled for testing)...')
 
-    // Use setTimeout to ensure navigation happens after event handlers complete
-    setTimeout(() => {
-      try {
-        console.log('Executing navigation now...')
-        // Try multiple navigation methods
-        console.log('Trying window.location.assign()...')
-        window.location.assign(url)
-        console.log('Navigation initiated successfully')
-      } catch (error) {
-        console.error('Failed to navigate:', error)
-        // Fallback to direct href assignment
-        try {
-          console.log('Fallback: trying window.location.href...')
-          window.location.href = url
-        } catch (e2) {
-          console.error('Fallback also failed:', e2)
-        }
-      }
-    }, 100) // Increased timeout to 100ms
+    // Try immediate navigation without setTimeout
+    try {
+      console.log('Attempting immediate navigation...')
+      window.location.assign(url)
+      console.log('Navigation initiated successfully')
+    } catch (error) {
+      console.error('Failed to navigate:', error)
+    }
   }
 
   return (
