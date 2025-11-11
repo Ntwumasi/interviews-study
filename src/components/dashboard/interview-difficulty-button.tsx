@@ -20,11 +20,9 @@ export function InterviewDifficultyButton({
   difficultyLabel,
   buttonHoverClass,
 }: InterviewDifficultyButtonProps) {
-  const handleClick = (e: React.MouseEvent) => {
-    const targetUrl = `/interview/start?type=${type}&difficulty=${difficulty}`
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     console.log('Interview button clicked:', { type, difficulty })
-    console.log('Navigating to:', targetUrl)
-    console.log('Full href would be:', window.location.origin + targetUrl)
+    console.log('Target URL:', e.currentTarget.href)
 
     // Track interview click event
     try {
@@ -39,24 +37,21 @@ export function InterviewDifficultyButton({
   }
 
   const href = `/interview/start?type=${type}&difficulty=${difficulty}`
-  console.log('Button rendered with href:', href, { type, difficulty })
 
   return (
-    <Link
-      href={href}
-      onClick={handleClick}
+    <Button
+      variant="ghost"
+      className={`w-full justify-start text-left ${buttonHoverClass} border border-white/10 text-sm sm:text-base py-2 sm:py-2.5 h-auto`}
+      asChild
     >
-      <Button
-        variant="ghost"
-        className={`w-full justify-start text-left ${buttonHoverClass} border border-white/10 text-sm sm:text-base py-2 sm:py-2.5 h-auto`}
-      >
+      <Link href={href} onClick={handleClick}>
         <span className={`font-semibold ${difficultyColor}`}>
           {difficultyLabel}
         </span>
         <span className="text-gray-400 text-xs sm:text-sm ml-2">
           - AI picks a scenario
         </span>
-      </Button>
-    </Link>
+      </Link>
+    </Button>
   )
 }
