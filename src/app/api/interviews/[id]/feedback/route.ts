@@ -14,7 +14,7 @@ const anthropic = new Anthropic({
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Authenticate user
@@ -27,7 +27,7 @@ export async function POST(
       )
     }
 
-    const interviewId = params.id
+    const { id: interviewId } = await params
 
     // 2. Fetch interview with scenario
     if (!supabaseAdmin) {
@@ -152,7 +152,7 @@ export async function POST(
  */
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // 1. Authenticate user
@@ -165,7 +165,7 @@ export async function GET(
       )
     }
 
-    const interviewId = params.id
+    const { id: interviewId } = await params
 
     // 2. Fetch feedback with interview verification
     if (!supabaseAdmin) {
