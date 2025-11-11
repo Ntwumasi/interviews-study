@@ -20,34 +20,21 @@ export function InterviewDifficultyButton({
   buttonHoverClass,
 }: InterviewDifficultyButtonProps) {
   const handleClick = () => {
-    console.log('Interview button clicked:', { type, difficulty })
-
     const url = `/interview/start?type=${type}&difficulty=${difficulty}`
-    console.log('Navigating to:', url)
-    console.log('Full URL will be:', window.location.origin + url)
 
-    // TEMPORARILY DISABLED: Track interview click event
-    // try {
-    //   trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
-    //     type,
-    //     difficulty,
-    //     location: 'dashboard',
-    //   })
-    // } catch (error) {
-    //   console.error('Analytics tracking error (non-blocking):', error)
-    // }
-
-    // Use window.location for full page navigation to ensure query params are sent
-    console.log('About to navigate (PostHog tracking disabled for testing)...')
-
-    // Try immediate navigation without setTimeout
+    // Track interview click event
     try {
-      console.log('Attempting immediate navigation...')
-      window.location.assign(url)
-      console.log('Navigation initiated successfully')
+      trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
+        type,
+        difficulty,
+        location: 'dashboard',
+      })
     } catch (error) {
-      console.error('Failed to navigate:', error)
+      console.error('Analytics tracking error (non-blocking):', error)
     }
+
+    // Navigate to interview start
+    window.location.assign(url)
   }
 
   return (
