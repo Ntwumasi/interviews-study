@@ -39,12 +39,17 @@ export function InterviewDifficultyButton({
 
     // Use window.location for full page navigation to ensure query params are sent
     console.log('About to set window.location.href...')
-    try {
-      window.location.href = url
-      console.log('window.location.href set successfully')
-    } catch (error) {
-      console.error('Failed to set window.location.href:', error)
-    }
+
+    // Use setTimeout to ensure navigation happens after event handlers complete
+    setTimeout(() => {
+      try {
+        console.log('Executing navigation now...')
+        window.location.href = url
+        console.log('window.location.href set successfully')
+      } catch (error) {
+        console.error('Failed to set window.location.href:', error)
+      }
+    }, 0)
   }
 
   return (
