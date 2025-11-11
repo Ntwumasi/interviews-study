@@ -4,6 +4,8 @@ import { Code2, Network, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { InterviewDifficultyButton } from '@/components/dashboard/interview-difficulty-button'
+import { PastInterviewsSection } from '@/components/dashboard/past-interviews-section'
+import { supabaseAdmin } from '@/lib/supabase'
 
 const INTERVIEW_TYPES = [
   {
@@ -56,12 +58,47 @@ const DIFFICULTY_LEVELS = [
   { value: 'hard', label: 'Hard', color: 'text-red-400' },
 ]
 
+async function getPastInterviews(userId: string) {
+  if (!supabaseAdmin) {
+    return []
+  }
+
+  // Get user from Supabase
+  const { data: user } = await supabaseAdmin
+    .from('users')
+    .select('id')
+    .eq('clerk_id', userId)
+    .single()
+
+  if (!user) {
+    return []
+  }
+
+  // Fetch completed interviews with scenarios and feedback
+  const { data: interviews, error } = await supabaseAdmin
+    .from('interviews')
+    .select('*, scenario:scenarios(*), feedback:feedback(*)')
+    .eq('user_id', user.id)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false })
+    .limit(10)
+
+  if (error) {
+    console.error('Failed to fetch past interviews:', error)
+    return []
+  }
+
+  return interviews || []
+}
+
 export default async function DashboardPage() {
   const { userId } = await auth()
 
   if (!userId) {
     redirect('/sign-in')
   }
+
+  const pastInterviews = await getPastInterviews(userId)
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
@@ -77,7 +114,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Interview Type Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12">
           {INTERVIEW_TYPES.map((type) => {
             const Icon = type.icon
             return (
@@ -134,6 +171,11 @@ export default async function DashboardPage() {
             )
           })}
         </div>
+
+        {/* Past Interviews Section */}
+        {pastInterviews.length > 0 && (
+          <PastInterviewsSection interviews={pastInterviews} />
+        )}
 
         {/* Help Text */}
         <div className="mt-8 sm:mt-10 md:mt-12 text-center">
