@@ -101,10 +101,9 @@ export function trackEvent<T extends AnalyticsEventProps>(
   eventName: string,
   properties: T
 ): void {
-  if (typeof window !== 'undefined') {
+  if (typeof window !== 'undefined' && (window as any).posthog) {
     try {
-      const posthog = require('@/lib/posthog').posthog
-      posthog.capture(eventName, properties)
+      ;(window as any).posthog.capture(eventName, properties)
     } catch (error) {
       console.error('Failed to track event:', error)
     }

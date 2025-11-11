@@ -21,12 +21,18 @@ export function InterviewDifficultyButton({
   buttonHoverClass,
 }: InterviewDifficultyButtonProps) {
   const handleClick = () => {
+    console.log('Interview button clicked:', { type, difficulty })
+
     // Track interview click event
-    trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
-      type,
-      difficulty,
-      location: 'dashboard',
-    })
+    try {
+      trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
+        type,
+        difficulty,
+        location: 'dashboard',
+      })
+    } catch (error) {
+      console.error('Analytics tracking error (non-blocking):', error)
+    }
   }
 
   return (

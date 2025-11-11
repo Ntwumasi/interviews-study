@@ -22,12 +22,16 @@ export function initPostHog() {
         capture_pageview: false, // We'll manually capture pageviews in the provider
         capture_pageleave: true,
         loaded: (posthog) => {
+          // Expose posthog on window for easy access
+          ;(window as any).posthog = posthog
           if (process.env.NODE_ENV === 'development') {
             console.log('PostHog loaded successfully')
             posthog.debug() // Enable debug mode in development
           }
         },
       })
+      // Also expose immediately
+      ;(window as any).posthog = posthog
     } catch (error) {
       console.error('Failed to initialize PostHog:', error)
     }
