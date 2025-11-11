@@ -1,13 +1,34 @@
 'use client'
 
-import { useEffect } from 'react'
+import { Suspense, useEffect } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useUser } from '@clerk/nextjs'
 import { initPostHog, posthog } from '@/lib/posthog'
 
-export function PostHogProvider({ children }: { children: React.ReactNode }) {
+function PostHogPageView() {
   const pathname = usePathname()
   const searchParams = useSearchParams()
+
+  useEffect(() => {
+    if (pathname) {
+      try {
+        let url = window.origin + pathname
+        if (searchParams && searchParams.toString()) {
+          url = url + `?${searchParams.toString()}`
+        }
+        posthog.capture('$pageview', {
+          $current_url: url,
+        })
+      } catch (error) {
+        console.error('Failed to track pageview:', error)
+      }
+    }
+  }, [pathname, searchParams])
+
+  return null
+}
+
+export function PostHogProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoaded } = useUser()
 
   // Initialize PostHog on mount
@@ -30,22 +51,12 @@ export function PostHogProvider({ children }: { children: React.ReactNode }) {
     }
   }, [user, isLoaded])
 
-  // Track page views on route changes
-  useEffect(() => {
-    if (pathname) {
-      try {
-        let url = window.origin + pathname
-        if (searchParams && searchParams.toString()) {
-          url = url + `?${searchParams.toString()}`
-        }
-        posthog.capture('$pageview', {
-          $current_url: url,
-        })
-      } catch (error) {
-        console.error('Failed to track pageview:', error)
-      }
-    }
-  }, [pathname, searchParams])
-
-  return <>{children}</>
+  return (
+    <>
+      <Suspense fallback={null}>
+        <PostHogPageView />
+      </Suspense>
+      {children}
+    </>
+  )
 }
