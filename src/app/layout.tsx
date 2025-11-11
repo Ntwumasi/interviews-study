@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
+import { EnvCheck } from '@/components/debug/env-check'
 import "./globals.css";
 
 const inter = Inter({
@@ -94,6 +95,7 @@ export default function RootLayout({
         <body className="font-sans antialiased">
           <PostHogProvider>
             {children}
+            <EnvCheck />
           </PostHogProvider>
         </body>
       </html>
