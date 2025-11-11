@@ -44,12 +44,21 @@ export function InterviewDifficultyButton({
     setTimeout(() => {
       try {
         console.log('Executing navigation now...')
-        window.location.href = url
-        console.log('window.location.href set successfully')
+        // Try multiple navigation methods
+        console.log('Trying window.location.assign()...')
+        window.location.assign(url)
+        console.log('Navigation initiated successfully')
       } catch (error) {
-        console.error('Failed to set window.location.href:', error)
+        console.error('Failed to navigate:', error)
+        // Fallback to direct href assignment
+        try {
+          console.log('Fallback: trying window.location.href...')
+          window.location.href = url
+        } catch (e2) {
+          console.error('Fallback also failed:', e2)
+        }
       }
-    }, 0)
+    }, 100) // Increased timeout to 100ms
   }
 
   return (
