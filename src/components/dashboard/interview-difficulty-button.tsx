@@ -20,8 +20,11 @@ export function InterviewDifficultyButton({
   difficultyLabel,
   buttonHoverClass,
 }: InterviewDifficultyButtonProps) {
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    const targetUrl = `/interview/start?type=${type}&difficulty=${difficulty}`
     console.log('Interview button clicked:', { type, difficulty })
+    console.log('Navigating to:', targetUrl)
+    console.log('Full href would be:', window.location.origin + targetUrl)
 
     // Track interview click event
     try {
@@ -35,9 +38,12 @@ export function InterviewDifficultyButton({
     }
   }
 
+  const href = `/interview/start?type=${type}&difficulty=${difficulty}`
+  console.log('Button rendered with href:', href, { type, difficulty })
+
   return (
     <Link
-      href={`/interview/start?type=${type}&difficulty=${difficulty}`}
+      href={href}
       onClick={handleClick}
     >
       <Button
