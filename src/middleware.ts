@@ -10,9 +10,16 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 export default clerkMiddleware(async (auth, req) => {
+  const pathname = req.nextUrl.pathname
+  console.log('[MIDDLEWARE] Request:', pathname, 'Search:', req.nextUrl.search)
+  console.log('[MIDDLEWARE] Is public route?', isPublicRoute(req))
+
   // Protect all routes except public ones
   if (!isPublicRoute(req)) {
+    console.log('[MIDDLEWARE] Calling auth.protect() for:', pathname)
     await auth.protect()
+  } else {
+    console.log('[MIDDLEWARE] Skipping auth.protect() for public route:', pathname)
   }
 })
 
