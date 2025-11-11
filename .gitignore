@@ -39,3 +39,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Internal documentation (not for public repo)
+CLAUDE_CODE_PROMPTS.md
+PROJECT.md
+QUICKSTART.md
