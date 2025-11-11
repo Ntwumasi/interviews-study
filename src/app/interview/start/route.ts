@@ -14,10 +14,17 @@ import { ANALYTICS_EVENTS, trackEvent, InterviewStartedProps } from '@/types/ana
  */
 export async function GET(request: NextRequest) {
   try {
+    // LOGGING: Request URL
+    console.log('[INTERVIEW START] Full URL:', request.url)
+    console.log('[INTERVIEW START] Pathname:', request.nextUrl.pathname)
+    console.log('[INTERVIEW START] Search params:', request.nextUrl.searchParams.toString())
+
     // 1. Authenticate user
     const { userId } = await auth()
+    console.log('[INTERVIEW START] User ID:', userId)
 
     if (!userId) {
+      console.log('[INTERVIEW START] ERROR: No user ID - returning 401')
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -29,7 +36,11 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get('type') as InterviewType
     const difficulty = searchParams.get('difficulty') as DifficultyLevel
 
+    console.log('[INTERVIEW START] Parsed type:', type, typeof type)
+    console.log('[INTERVIEW START] Parsed difficulty:', difficulty, typeof difficulty)
+
     if (!type || !['coding', 'system_design', 'behavioral'].includes(type)) {
+      console.log('[INTERVIEW START] ERROR: Invalid type -', type)
       return NextResponse.json(
         { error: 'Invalid or missing interview type. Must be: coding, system_design, or behavioral' },
         { status: 400 }
@@ -37,11 +48,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (!difficulty || !['easy', 'medium', 'hard'].includes(difficulty)) {
+      console.log('[INTERVIEW START] ERROR: Invalid difficulty -', difficulty)
       return NextResponse.json(
         { error: 'Invalid or missing difficulty. Must be: easy, medium, or hard' },
         { status: 400 }
       )
     }
+
+    console.log('[INTERVIEW START] ✓ Validation passed. Type:', type, 'Difficulty:', difficulty)
 
     // 3. Get or create user in Supabase
     if (!supabaseAdmin) {
@@ -96,6 +110,7 @@ export async function GET(request: NextRequest) {
     }
 
     // 4. Query Supabase for a random scenario matching type and difficulty
+    console.log('[INTERVIEW START] Querying scenarios with:', { type, difficulty })
     const { data: scenarios, error: scenarioError } = await supabaseAdmin
       .from('scenarios')
       .select('*')
@@ -103,14 +118,17 @@ export async function GET(request: NextRequest) {
       .eq('difficulty', difficulty)
 
     if (scenarioError) {
-      console.error('Failed to fetch scenarios:', scenarioError)
+      console.error('[INTERVIEW START] ERROR: Failed to fetch scenarios:', scenarioError)
       return NextResponse.json(
         { error: 'Failed to fetch interview scenarios' },
         { status: 500 }
       )
     }
 
+    console.log('[INTERVIEW START] Found scenarios:', scenarios?.length || 0)
+
     if (!scenarios || scenarios.length === 0) {
+      console.log('[INTERVIEW START] ERROR: No scenarios found for', { type, difficulty })
       return NextResponse.json(
         { error: `No ${difficulty} ${type} scenarios available. Please try a different combination.` },
         { status: 404 }
@@ -120,6 +138,7 @@ export async function GET(request: NextRequest) {
     // Pick a random scenario
     const randomIndex = Math.floor(Math.random() * scenarios.length)
     const scenario = scenarios[randomIndex] as Scenario
+    console.log('[INTERVIEW START] Selected scenario:', scenario.title)
 
     // 5. Create new interview record
     const { data: interview, error: interviewError } = await supabaseAdmin
@@ -158,9 +177,9 @@ export async function GET(request: NextRequest) {
     })
 
     // 7. Redirect to interview room
-    return NextResponse.redirect(
-      new URL(`/interview/${interview.id}`, request.url)
-    )
+    const redirectUrl = new URL(`/interview/${interview.id}`, request.url)
+    console.log('[INTERVIEW START] ✓ SUCCESS - Redirecting to:', redirectUrl.href)
+    return NextResponse.redirect(redirectUrl)
   } catch (error) {
     console.error('Unexpected error in interview start:', error)
     return NextResponse.json(
