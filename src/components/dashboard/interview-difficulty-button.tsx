@@ -24,8 +24,9 @@ export function InterviewDifficultyButton({
 
     const url = `/interview/start?type=${type}&difficulty=${difficulty}`
     console.log('Navigating to:', url)
+    console.log('Full URL will be:', window.location.origin + url)
 
-    // Track interview click event
+    // Track interview click event (non-blocking)
     try {
       trackEvent<InterviewClickedProps>(ANALYTICS_EVENTS.INTERVIEW_CLICKED, {
         type,
@@ -37,7 +38,13 @@ export function InterviewDifficultyButton({
     }
 
     // Use window.location for full page navigation to ensure query params are sent
-    window.location.href = url
+    console.log('About to set window.location.href...')
+    try {
+      window.location.href = url
+      console.log('window.location.href set successfully')
+    } catch (error) {
+      console.error('Failed to set window.location.href:', error)
+    }
   }
 
   return (
