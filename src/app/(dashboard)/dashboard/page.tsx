@@ -64,52 +64,52 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
         {/* Header */}
-        <div className="mb-12">
-          <h1 className="text-5xl font-bold text-white mb-4">
+        <div className="mb-8 sm:mb-10 md:mb-12">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
             Choose Your Interview
           </h1>
-          <p className="text-xl text-gray-400">
+          <p className="text-base sm:text-lg md:text-xl text-gray-400">
             Select an interview type and difficulty level to start practicing
           </p>
         </div>
 
         {/* Interview Type Cards */}
-        <div className="grid lg:grid-cols-3 gap-8">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {INTERVIEW_TYPES.map((type) => {
             const Icon = type.icon
             return (
               <div
                 key={type.id}
-                className={`bg-white/5 backdrop-blur-sm rounded-2xl p-8 border transition-all ${type.borderColor} ${type.bgColor}`}
+                className={`bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border transition-all ${type.borderColor} ${type.bgColor}`}
               >
                 {/* Icon and Header */}
-                <div className="flex items-start gap-4 mb-6">
-                  <div className={`p-4 rounded-xl ${type.iconBg}`}>
-                    <Icon className={`w-10 h-10 ${type.iconColor}`} />
+                <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
+                  <div className={`p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl ${type.iconBg}`}>
+                    <Icon className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 ${type.iconColor}`} />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold text-white mb-1">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1">
                       {type.name}
                     </h2>
-                    <p className="text-sm text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-400">
                       {type.duration} minutes • Video recorded
                     </p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-gray-300 mb-6 leading-relaxed min-h-[4.5rem]">
+                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-5 md:mb-6 leading-relaxed min-h-[3.5rem] sm:min-h-[4.5rem]">
                   {type.description}
                 </p>
 
                 {/* Difficulty Selection */}
-                <div className="space-y-3">
-                  <p className="text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                <div className="space-y-2 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide">
                     Choose Difficulty
                   </p>
-                  <div className="space-y-2">
+                  <div className="space-y-1.5 sm:space-y-2">
                     {DIFFICULTY_LEVELS.map((difficulty) => (
                       <Link
                         key={difficulty.value}
@@ -117,12 +117,12 @@ export default async function DashboardPage() {
                       >
                         <Button
                           variant="ghost"
-                          className={`w-full justify-start text-left ${type.buttonHover} border border-white/10`}
+                          className={`w-full justify-start text-left ${type.buttonHover} border border-white/10 text-sm sm:text-base py-2 sm:py-2.5 h-auto`}
                         >
                           <span className={`font-semibold ${difficulty.color}`}>
                             {difficulty.label}
                           </span>
-                          <span className="text-gray-400 text-sm ml-2">
+                          <span className="text-gray-400 text-xs sm:text-sm ml-2">
                             - AI picks a scenario
                           </span>
                         </Button>
@@ -132,7 +132,7 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Info Footer */}
-                <div className="mt-6 pt-6 border-t border-white/10">
+                <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-white/10">
                   <p className="text-xs text-gray-500">
                     Practice with realistic scenarios and get detailed AI feedback
                   </p>
@@ -143,8 +143,8 @@ export default async function DashboardPage() {
         </div>
 
         {/* Help Text */}
-        <div className="mt-12 text-center">
-          <p className="text-gray-400 text-sm">
+        <div className="mt-8 sm:mt-10 md:mt-12 text-center">
+          <p className="text-gray-400 text-xs sm:text-sm px-4">
             Not sure where to start? We recommend Medium difficulty for most users.
           </p>
         </div>
