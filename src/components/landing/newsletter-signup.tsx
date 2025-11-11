@@ -4,6 +4,7 @@ import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CheckCircle2, Mail } from 'lucide-react'
+import { ANALYTICS_EVENTS, trackEvent, NewsletterSignupProps } from '@/types/analytics'
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState('')
@@ -19,6 +20,11 @@ export function NewsletterSignup() {
 
     // Log the email for now (will connect to a service later)
     console.log('Newsletter signup email:', email)
+
+    // Track newsletter signup
+    trackEvent<NewsletterSignupProps>(ANALYTICS_EVENTS.NEWSLETTER_SIGNUP, {
+      source: 'landing_page',
+    })
 
     // Simulate API call
     await new Promise(resolve => setTimeout(resolve, 500))

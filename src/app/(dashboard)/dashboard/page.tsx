@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { Code2, Network, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { InterviewDifficultyButton } from '@/components/dashboard/interview-difficulty-button'
 
 const INTERVIEW_TYPES = [
   {
@@ -111,22 +112,14 @@ export default async function DashboardPage() {
                   </p>
                   <div className="space-y-1.5 sm:space-y-2">
                     {DIFFICULTY_LEVELS.map((difficulty) => (
-                      <Link
+                      <InterviewDifficultyButton
                         key={difficulty.value}
-                        href={`/interview/start?type=${type.id}&difficulty=${difficulty.value}`}
-                      >
-                        <Button
-                          variant="ghost"
-                          className={`w-full justify-start text-left ${type.buttonHover} border border-white/10 text-sm sm:text-base py-2 sm:py-2.5 h-auto`}
-                        >
-                          <span className={`font-semibold ${difficulty.color}`}>
-                            {difficulty.label}
-                          </span>
-                          <span className="text-gray-400 text-xs sm:text-sm ml-2">
-                            - AI picks a scenario
-                          </span>
-                        </Button>
-                      </Link>
+                        type={type.id as any}
+                        difficulty={difficulty.value as any}
+                        difficultyColor={difficulty.color}
+                        difficultyLabel={difficulty.label}
+                        buttonHoverClass={type.buttonHover}
+                      />
                     ))}
                   </div>
                 </div>
