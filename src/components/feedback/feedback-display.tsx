@@ -18,12 +18,22 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
   const router = useRouter()
   const [feedback, setFeedback] = useState(initialFeedback)
   const [isGenerating, setIsGenerating] = useState(!initialFeedback)
+  const [error, setError] = useState<string | null>(null)
+  const [pollCount, setPollCount] = useState(0)
 
   useEffect(() => {
     // If no feedback yet, poll until it's generated
     if (!feedback) {
       const pollFeedback = async () => {
         try {
+          // Trigger feedback generation on first poll
+          if (pollCount === 0) {
+            await fetch(`/api/interviews/${interview.id}/feedback`, {
+              method: 'POST',
+            })
+          }
+
+          // Check if feedback exists
           const response = await fetch(`/api/interviews/${interview.id}/feedback`)
           if (response.ok) {
             const data = await response.json()
@@ -32,8 +42,18 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
               setIsGenerating(false)
             }
           }
+
+          setPollCount((prev) => prev + 1)
+
+          // Stop polling after 30 attempts (60 seconds)
+          if (pollCount >= 30) {
+            setError('Feedback generation is taking longer than expected. Please refresh the page or try again later.')
+            setIsGenerating(false)
+          }
         } catch (error) {
           console.error('Failed to fetch feedback:', error)
+          setError('Failed to generate feedback. Please try again later.')
+          setIsGenerating(false)
         }
       }
 
@@ -43,7 +63,27 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
 
       return () => clearInterval(interval)
     }
-  }, [feedback, interview.id])
+  }, [feedback, interview.id, pollCount])
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <AlertCircle className="h-16 w-16 text-yellow-400 mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-white mb-2">Feedback Generation Issue</h2>
+          <p className="text-gray-400 mb-6">{error}</p>
+          <div className="flex gap-4 justify-center">
+            <Button onClick={() => router.refresh()} variant="outline">
+              Refresh Page
+            </Button>
+            <Link href="/dashboard">
+              <Button>Back to Dashboard</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   if (isGenerating) {
     return (
@@ -52,6 +92,7 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
           <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mb-4"></div>
           <h2 className="text-xl font-semibold text-white mb-2">Generating Your Feedback...</h2>
           <p className="text-gray-400">Our AI is analyzing your interview performance</p>
+          <p className="text-gray-500 text-sm mt-2">This usually takes 10-30 seconds</p>
         </div>
       </div>
     )
