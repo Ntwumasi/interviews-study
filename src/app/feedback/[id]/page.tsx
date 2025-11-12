@@ -4,9 +4,9 @@ import { supabaseAdmin } from '@/lib/supabase'
 import { FeedbackDisplay } from '@/components/feedback/feedback-display'
 
 interface FeedbackPageProps {
-  params: {
+  params: Promise<{
     id: string
-  }
+  }>
 }
 
 async function getInterviewFeedback(interviewId: string, userId: string) {
@@ -40,7 +40,8 @@ export default async function FeedbackPage({ params }: FeedbackPageProps) {
     redirect('/sign-in')
   }
 
-  const interview = await getInterviewFeedback(params.id, userId)
+  const { id } = await params
+  const interview = await getInterviewFeedback(id, userId)
 
   if (!interview) {
     redirect('/dashboard')
