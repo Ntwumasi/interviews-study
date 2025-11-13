@@ -7,7 +7,10 @@ import { DURATION_BY_TYPE } from '@/types'
 import { InterviewTimer } from './interview-timer'
 import { InterviewChat } from './interview-chat'
 import { InterviewWorkspace } from './interview-workspace'
+import { AIInterviewerAvatar } from './ai-interviewer-avatar'
+import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
+import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -37,6 +40,8 @@ export function InterviewRoom({
   const [isEndDialogOpen, setIsEndDialogOpen] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [timeUp, setTimeUp] = useState(false)
+  const [isWorkspaceExpanded, setIsWorkspaceExpanded] = useState(true)
+  const [isAISpeaking, setIsAISpeaking] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -51,6 +56,8 @@ export function InterviewRoom({
     setTranscript((prev) => [...prev, userMessage])
 
     try {
+      setIsAISpeaking(true)
+
       // Call AI interviewer API
       const response = await fetch('/api/ai-interviewer', {
         method: 'POST',
@@ -76,8 +83,13 @@ export function InterviewRoom({
       }
 
       setTranscript((prev) => [...prev, aiMessage])
+
+      // Simulate speaking animation duration based on message length
+      const speakingDuration = Math.min(data.message.length * 30, 3000)
+      setTimeout(() => setIsAISpeaking(false), speakingDuration)
     } catch (error) {
       console.error('Failed to send message:', error)
+      setIsAISpeaking(false)
       // Add error message
       setTranscript((prev) => [
         ...prev,
@@ -134,19 +146,19 @@ export function InterviewRoom({
   }, [])
 
   return (
-    <div className="h-screen flex flex-col">
-      {/* Header */}
-      <div className="border-b border-white/10 bg-[#0A0A0A]/90 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Modern Header - Zoom Style */}
+      <div className="border-b border-white/10 bg-black/30 backdrop-blur-sm">
+        <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
           <div>
-            <h1 className="text-xl font-semibold text-white">{scenario.title}</h1>
-            <p className="text-sm text-gray-400 mt-1">
+            <h1 className="text-lg sm:text-xl font-semibold text-white">{scenario.title}</h1>
+            <p className="text-xs sm:text-sm text-gray-400">
               {interviewType.replace('_', ' ').charAt(0).toUpperCase() +
-                interviewType.replace('_', ' ').slice(1)} • {scenario.difficulty}
+                interviewType.replace('_', ' ').slice(1)} Interview • {scenario.difficulty}
             </p>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <InterviewTimer
               durationMinutes={durationMinutes}
               startedAt={startedAt}
@@ -154,27 +166,60 @@ export function InterviewRoom({
             />
             <Button
               variant="destructive"
+              size="sm"
               onClick={handleEndInterview}
               disabled={isSubmitting}
             >
-              End Interview
+              Leave
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Content - Video Call Style */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Side: Workspace (Diagram, Code Editor, or Text Area) */}
-        <div className="w-1/2 border-r border-white/10">
-          <InterviewWorkspace
-            interviewId={interviewId}
-            interviewType={interviewType}
-          />
+        {/* Left Side: Video Area */}
+        <div className="flex-1 flex flex-col p-4 gap-4">
+          {/* AI Interviewer Video (Main) */}
+          <div className="flex-1 relative">
+            <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+
+            {/* User Camera (Picture-in-Picture) */}
+            <div className="absolute bottom-4 right-4 w-48 h-36 sm:w-64 sm:h-48 shadow-2xl">
+              <UserCamera />
+            </div>
+          </div>
+
+          {/* Code Editor / Workspace (Collapsible) */}
+          {interviewType === 'coding' || interviewType === 'system_design' ? (
+            <div className={`transition-all duration-300 ${isWorkspaceExpanded ? 'h-96' : 'h-12'} border-t border-white/10 bg-black/20 backdrop-blur-sm rounded-lg overflow-hidden`}>
+              <button
+                onClick={() => setIsWorkspaceExpanded(!isWorkspaceExpanded)}
+                className="w-full px-4 py-2 flex items-center justify-between bg-black/30 hover:bg-black/40 transition-colors"
+              >
+                <span className="text-sm font-medium text-white">
+                  {interviewType === 'coding' ? 'Code Editor' : 'Whiteboard'}
+                </span>
+                {isWorkspaceExpanded ? (
+                  <ChevronDown className="w-5 h-5 text-gray-400" />
+                ) : (
+                  <ChevronUp className="w-5 h-5 text-gray-400" />
+                )}
+              </button>
+              {isWorkspaceExpanded && (
+                <div className="h-[calc(100%-40px)]">
+                  <InterviewWorkspace
+                    interviewId={interviewId}
+                    interviewType={interviewType}
+                  />
+                </div>
+              )}
+            </div>
+          ) : null}
         </div>
 
         {/* Right Side: Chat Interface */}
-        <div className="w-1/2">
+        <div className="w-96 border-l border-white/10 bg-black/20 backdrop-blur-sm">
           <InterviewChat
             transcript={transcript}
             onSendMessage={handleSendMessage}
@@ -184,15 +229,15 @@ export function InterviewRoom({
 
       {/* End Interview Confirmation Dialog */}
       <Dialog open={isEndDialogOpen} onOpenChange={setIsEndDialogOpen}>
-        <DialogContent className="bg-[#0A0A0A] border-white/10">
+        <DialogContent className="bg-gray-900 border border-white/10">
           <DialogHeader>
-            <DialogTitle>
-              {timeUp ? 'Time\'s Up!' : 'End Interview?'}
+            <DialogTitle className="text-white">
+              {timeUp ? 'Time\'s Up!' : 'Leave Interview?'}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-400">
               {timeUp
                 ? 'Your time is up. Your interview will be submitted for feedback.'
-                : 'Are you sure you want to end this interview? Your progress will be saved and you\'ll receive feedback.'}
+                : 'Are you sure you want to leave this interview? Your progress will be saved and you\'ll receive feedback.'}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -201,13 +246,15 @@ export function InterviewRoom({
                 variant="ghost"
                 onClick={() => setIsEndDialogOpen(false)}
                 disabled={isSubmitting}
+                className="text-white hover:bg-white/10"
               >
-                Continue Interview
+                Stay in Interview
               </Button>
             )}
             <Button
               onClick={handleConfirmEnd}
               disabled={isSubmitting}
+              className="bg-blue-600 hover:bg-blue-700"
             >
               {isSubmitting ? 'Submitting...' : 'Submit & Get Feedback'}
             </Button>
