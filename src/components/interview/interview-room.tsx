@@ -192,12 +192,15 @@ export function InterviewRoom({
 
         {/* Right Side: Video + Chat */}
         <div className="w-96 flex flex-col">
-          {/* AI Interviewer Video */}
-          <div className="h-64 relative border-b border-white/10 bg-black/20">
-            <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+          {/* Video Panel */}
+          <div className="flex flex-col gap-3 p-3 border-b border-white/10 bg-black/20">
+            {/* AI Interviewer Video */}
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 shadow-xl">
+              <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+            </div>
 
-            {/* User Camera (Picture-in-Picture) */}
-            <div className="absolute bottom-2 right-2 w-28 h-20 shadow-xl">
+            {/* User Camera */}
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 shadow-lg">
               <UserCamera />
             </div>
           </div>

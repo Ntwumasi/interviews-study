@@ -75,7 +75,7 @@ export function UserCamera() {
   }, [stream])
 
   return (
-    <div className="relative w-full h-full bg-gray-900 rounded-lg overflow-hidden border border-white/10">
+    <div className="relative w-full h-full bg-gray-900">
       {isCameraOn ? (
         <video
           ref={videoRef}
@@ -85,37 +85,37 @@ export function UserCamera() {
           className="w-full h-full object-cover"
         />
       ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900 p-2">
-          <div className="w-12 h-12 rounded-full bg-blue-500/20 flex items-center justify-center mb-2">
-            <Video className="w-6 h-6 text-blue-400" />
+        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+          <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-3">
+            <Video className="w-8 h-8 text-blue-400" />
           </div>
-          <p className="text-gray-400 text-xs mb-2">Camera Off</p>
-          {error && <p className="text-red-400 text-[10px] mb-2 text-center px-2">{error}</p>}
+          <p className="text-gray-400 text-sm mb-2">Camera Off</p>
+          {error && <p className="text-red-400 text-xs mb-3 text-center px-4 max-w-xs">{error}</p>}
           <Button
             size="sm"
             onClick={startCamera}
-            className="bg-blue-600 hover:bg-blue-700 text-xs h-7"
+            className="bg-blue-600 hover:bg-blue-700"
           >
-            Turn On
+            Turn On Camera
           </Button>
         </div>
       )}
 
       {/* Controls */}
       {isCameraOn && (
-        <div className="absolute bottom-2 left-1/2 transform -translate-x-1/2">
+        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2">
           <button
             onClick={stopCamera}
-            className="p-2 rounded-full bg-red-600 hover:bg-red-700 transition-colors shadow-lg"
+            className="p-2.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors shadow-lg"
             title="Turn off camera"
           >
-            <VideoOff className="w-3 h-3 text-white" />
+            <VideoOff className="w-4 h-4 text-white" />
           </button>
         </div>
       )}
 
       {/* Label */}
-      <div className="absolute top-1 left-1 bg-black/50 backdrop-blur-sm px-2 py-0.5 rounded text-[10px] text-white">
+      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-white font-medium">
         You
       </div>
     </div>
