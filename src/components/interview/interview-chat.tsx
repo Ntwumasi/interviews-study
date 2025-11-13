@@ -119,7 +119,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
           </Button>
         </form>
         <p className="text-xs text-gray-500 mt-2">
-          Press Enter to send • Shift+Enter for new line
+          Press Enter to send • Shift+Enter for new line • <span className="text-blue-400">💡 AI can see your code</span>
         </p>
       </div>
     </div>
