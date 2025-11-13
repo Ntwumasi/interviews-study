@@ -19,18 +19,30 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
   const [feedback, setFeedback] = useState(initialFeedback)
   const [isGenerating, setIsGenerating] = useState(!initialFeedback)
   const [error, setError] = useState<string | null>(null)
-  const [pollCount, setPollCount] = useState(0)
 
   useEffect(() => {
     // If no feedback yet, poll until it's generated
     if (!feedback) {
+      let pollCount = 0
+      let hasTriggeredGeneration = false
+
       const pollFeedback = async () => {
         try {
           // Trigger feedback generation on first poll
-          if (pollCount === 0) {
-            await fetch(`/api/interviews/${interview.id}/feedback`, {
+          if (!hasTriggeredGeneration) {
+            hasTriggeredGeneration = true
+            console.log('[Feedback] Triggering feedback generation')
+            const postResponse = await fetch(`/api/interviews/${interview.id}/feedback`, {
               method: 'POST',
             })
+
+            if (!postResponse.ok) {
+              const errorData = await postResponse.json()
+              console.error('[Feedback] Failed to trigger generation:', errorData)
+              setError(errorData.error || 'Failed to start feedback generation')
+              setIsGenerating(false)
+              return
+            }
           }
 
           // Check if feedback exists
@@ -38,20 +50,27 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
           if (response.ok) {
             const data = await response.json()
             if (data.feedback) {
+              console.log('[Feedback] Feedback received successfully')
               setFeedback(data.feedback)
               setIsGenerating(false)
+              return
             }
+          } else if (response.status !== 404) {
+            // 404 is expected while feedback is being generated, other errors are not
+            const errorData = await response.json()
+            console.error('[Feedback] Error fetching feedback:', errorData)
           }
 
-          setPollCount((prev) => prev + 1)
+          pollCount++
 
           // Stop polling after 30 attempts (60 seconds)
           if (pollCount >= 30) {
+            console.warn('[Feedback] Timeout after 30 polling attempts')
             setError('Feedback generation is taking longer than expected. Please refresh the page or try again later.')
             setIsGenerating(false)
           }
         } catch (error) {
-          console.error('Failed to fetch feedback:', error)
+          console.error('[Feedback] Failed to fetch feedback:', error)
           setError('Failed to generate feedback. Please try again later.')
           setIsGenerating(false)
         }
@@ -63,7 +82,7 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
 
       return () => clearInterval(interval)
     }
-  }, [feedback, interview.id, pollCount])
+  }, [feedback, interview.id])
 
   if (error) {
     return (
@@ -207,7 +226,7 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
       {/* Detailed Feedback */}
       <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
         <h3 className="text-xl font-semibold text-white mb-4">Detailed Feedback</h3>
-        <div className="prose prose-invert prose-sm max-w-none">
+        <div className="prose prose-invert prose-sm max-w-none prose-headings:text-gray-200 prose-p:text-gray-300 prose-strong:text-gray-200 prose-li:text-gray-300">
           <ReactMarkdown>{feedback.detailed_feedback}</ReactMarkdown>
         </div>
       </div>

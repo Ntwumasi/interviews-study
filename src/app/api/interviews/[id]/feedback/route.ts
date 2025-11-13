@@ -4,6 +4,9 @@ import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '@/lib/supabase'
 import { InterviewType } from '@/types'
 
+// Increase timeout for AI feedback generation (max 60s on Vercel Pro, 10s on Hobby)
+export const maxDuration = 60
+
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 })
@@ -29,7 +32,15 @@ export async function POST(
 
     const { id: interviewId } = await params
 
-    // 2. Fetch interview with scenario
+    // 2. Check API configuration
+    if (!process.env.ANTHROPIC_API_KEY) {
+      console.error('[Feedback] ANTHROPIC_API_KEY not configured')
+      return NextResponse.json(
+        { error: 'AI service not configured' },
+        { status: 500 }
+      )
+    }
+
     if (!supabaseAdmin) {
       return NextResponse.json(
         { error: 'Database configuration error' },
@@ -90,6 +101,9 @@ export async function POST(
     )
 
     // 4. Call Claude API for feedback generation
+    console.log(`[Feedback] Generating feedback for interview ${interviewId}`)
+    const startTime = Date.now()
+
     const response = await anthropic.messages.create({
       model: 'claude-3-haiku-20240307',
       max_tokens: 4000,
@@ -101,6 +115,9 @@ export async function POST(
         },
       ],
     })
+
+    const duration = Date.now() - startTime
+    console.log(`[Feedback] AI response received in ${duration}ms`)
 
     const feedbackText = response.content[0].type === 'text'
       ? response.content[0].text
@@ -138,9 +155,24 @@ export async function POST(
       feedbackId: savedFeedback.id,
     })
   } catch (error) {
-    console.error('Error generating feedback:', error)
+    console.error('[Feedback] Error generating feedback:', error)
+
+    // Check if it's an Anthropic API error
+    if (error instanceof Error) {
+      console.error('[Feedback] Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack,
+      })
+
+      return NextResponse.json(
+        { error: `Failed to generate feedback: ${error.message}` },
+        { status: 500 }
+      )
+    }
+
     return NextResponse.json(
-      { error: 'An unexpected error occurred' },
+      { error: 'An unexpected error occurred while generating feedback' },
       { status: 500 }
     )
   }
