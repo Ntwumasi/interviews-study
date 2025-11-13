@@ -178,52 +178,37 @@ export function InterviewRoom({
 
       {/* Main Content - Video Call Style */}
       <div className="flex-1 flex overflow-hidden">
-        {/* Left Side: Video Area */}
-        <div className="flex-1 flex flex-col p-4 gap-4">
-          {/* AI Interviewer Video (Main) */}
-          <div className="flex-1 relative">
+        {/* Left Side: Code Editor (Main Focus) */}
+        <div className="flex-1 flex flex-col border-r border-white/10">
+          {interviewType === 'coding' || interviewType === 'system_design' ? (
+            <InterviewWorkspace
+              interviewId={interviewId}
+              interviewType={interviewType}
+            />
+          ) : (
+            <div className="flex-1 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+          )}
+        </div>
+
+        {/* Right Side: Video + Chat */}
+        <div className="w-96 flex flex-col">
+          {/* AI Interviewer Video */}
+          <div className="h-64 relative border-b border-white/10 bg-black/20">
             <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
 
             {/* User Camera (Picture-in-Picture) */}
-            <div className="absolute bottom-4 right-4 w-48 h-36 sm:w-64 sm:h-48 shadow-2xl">
+            <div className="absolute bottom-2 right-2 w-28 h-20 shadow-xl">
               <UserCamera />
             </div>
           </div>
 
-          {/* Code Editor / Workspace (Collapsible) */}
-          {interviewType === 'coding' || interviewType === 'system_design' ? (
-            <div className={`transition-all duration-300 ${isWorkspaceExpanded ? 'h-96' : 'h-12'} border-t border-white/10 bg-black/20 backdrop-blur-sm rounded-lg overflow-hidden`}>
-              <button
-                onClick={() => setIsWorkspaceExpanded(!isWorkspaceExpanded)}
-                className="w-full px-4 py-2 flex items-center justify-between bg-black/30 hover:bg-black/40 transition-colors"
-              >
-                <span className="text-sm font-medium text-white">
-                  {interviewType === 'coding' ? 'Code Editor' : 'Whiteboard'}
-                </span>
-                {isWorkspaceExpanded ? (
-                  <ChevronDown className="w-5 h-5 text-gray-400" />
-                ) : (
-                  <ChevronUp className="w-5 h-5 text-gray-400" />
-                )}
-              </button>
-              {isWorkspaceExpanded && (
-                <div className="h-[calc(100%-40px)]">
-                  <InterviewWorkspace
-                    interviewId={interviewId}
-                    interviewType={interviewType}
-                  />
-                </div>
-              )}
-            </div>
-          ) : null}
-        </div>
-
-        {/* Right Side: Chat Interface */}
-        <div className="w-96 border-l border-white/10 bg-black/20 backdrop-blur-sm">
-          <InterviewChat
-            transcript={transcript}
-            onSendMessage={handleSendMessage}
-          />
+          {/* Chat Interface */}
+          <div className="flex-1 bg-black/20 backdrop-blur-sm">
+            <InterviewChat
+              transcript={transcript}
+              onSendMessage={handleSendMessage}
+            />
+          </div>
         </div>
       </div>
 
