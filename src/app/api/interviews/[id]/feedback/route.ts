@@ -97,7 +97,8 @@ export async function POST(
       interview.interview_type,
       interview.scenario,
       interview.transcript,
-      interview.duration_seconds
+      interview.duration_seconds,
+      interview.code_submission
     )
 
     // 4. Call Claude API for feedback generation
@@ -245,12 +246,17 @@ function buildFeedbackPrompt(
   interviewType: InterviewType,
   scenario: any,
   transcript: any[],
-  durationSeconds: number
+  durationSeconds: number,
+  codeSubmission?: any
 ): string {
   const durationMinutes = Math.floor(durationSeconds / 60)
   const conversationHistory = transcript
     .map((msg) => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
     .join('\n\n')
+
+  const codeSection = codeSubmission?.code
+    ? `\n**Candidate's Code Submission:**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n`
+    : '\n**Note:** No code was submitted by the candidate.\n'
 
   const basePrompt = `You are an expert technical interviewer providing feedback on a ${interviewType.replace('_', ' ')} interview.
 
@@ -260,12 +266,18 @@ function buildFeedbackPrompt(
 - **Difficulty:** ${scenario.difficulty}
 - **Duration:** ${durationMinutes} minutes
 - **Type:** ${interviewType.replace('_', ' ')}
-
+${interviewType === 'coding' ? codeSection : ''}
 **Full Interview Transcript:**
 ${conversationHistory}
 
 **Your Task:**
 Provide comprehensive, constructive feedback on this interview performance. Be honest but encouraging. Highlight both strengths and areas for improvement.
+
+**CRITICAL: Focus ONLY on the interview performance**
+- Evaluate how well they performed on THIS specific interview question
+- If they went off-topic (e.g., asking about unrelated subjects), note this as a negative point
+- If they didn't attempt the problem or asked inappropriate questions, reflect this in a low score
+- Base your feedback entirely on their technical performance and interview conduct
 
 **You must respond in this EXACT JSON format:**
 \`\`\`json
@@ -312,13 +324,22 @@ Focus on their thought process, not perfect solutions. Real-world systems evolve
 1. **Problem Understanding:** Did they understand the problem before coding?
 2. **Solution Approach:** Did they explain their approach clearly?
 3. **Code Quality:** Was their code clean, readable, and well-structured?
-4. **Edge Cases:** Did they consider edge cases?
-5. **Complexity Analysis:** Did they analyze time and space complexity?
-6. **Optimization:** Did they optimize their solution when prompted?
-7. **Testing:** Did they discuss how to test their solution?
-8. **Communication:** Did they think aloud and explain their decisions?
+4. **Code Correctness:** Does their submitted code solve the problem? Review the actual code above.
+5. **Edge Cases:** Did they consider edge cases in their code?
+6. **Complexity Analysis:** Did they analyze time and space complexity?
+7. **Optimization:** Did they optimize their solution when prompted?
+8. **Testing:** Did they discuss how to test their solution?
+9. **Communication:** Did they think aloud and explain their decisions?
+10. **Interview Conduct:** Did they stay focused on the problem, or did they get distracted/ask off-topic questions?
 
-Be lenient on syntax errors but strict on logical thinking and problem-solving approach.
+**CRITICAL FOR CODING FEEDBACK:**
+- Review the actual code they wrote (shown above)
+- If they didn't write any code or very minimal code, this should be heavily reflected in technical_accuracy and problem_solving scores
+- If they asked to be taught unrelated topics (languages, off-topic questions), note this as poor interview conduct
+- Base technical_accuracy score on the correctness and completeness of their code
+- If they only wrote comments or a few lines, score accordingly (low scores 3-5/10)
+- If they have a working solution, even if not optimal, score fairly (6-8/10)
+- Be lenient on syntax errors but strict on logical thinking and problem-solving approach
 `
 
     case 'behavioral':

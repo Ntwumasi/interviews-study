@@ -73,7 +73,8 @@ export async function POST(request: NextRequest) {
     // 4. Build system prompt based on interview type
     const systemPrompt = buildSystemPrompt(
       interview.interview_type,
-      interview.scenario
+      interview.scenario,
+      interview.code_submission
     )
 
     // 5. Build conversation history for Claude
@@ -141,7 +142,7 @@ export async function POST(request: NextRequest) {
 /**
  * Builds the system prompt for the AI interviewer based on interview type
  */
-function buildSystemPrompt(interviewType: InterviewType, scenario: any): string {
+function buildSystemPrompt(interviewType: InterviewType, scenario: any, codeSubmission?: any): string {
   const basePrompt = `You are an experienced technical interviewer conducting a ${interviewType.replace('_', ' ')} interview. Your role is to guide the candidate through the interview professionally and constructively.
 
 **Interview Details:**
@@ -153,13 +154,20 @@ function buildSystemPrompt(interviewType: InterviewType, scenario: any): string 
 **Scenario Prompt:**
 ${scenario.prompt}
 
+**CRITICAL: STAY ON TOPIC - STRICT SANDBOXING RULES**
+- You MUST ONLY discuss topics related to this ${interviewType.replace('_', ' ')} interview
+- If the candidate asks about unrelated topics (languages, cooking, sports, etc.), politely redirect them back to the interview
+- Example response: "I appreciate your curiosity, but let's focus on the interview question at hand. Do you have any questions about the problem?"
+- NEVER engage in conversations about: teaching languages, personal topics, jokes, general knowledge, or anything not related to software engineering interviews
+- If they persist in off-topic questions, remind them: "This interview session is specifically for ${scenario.title}. Let's use our time effectively on the technical question."
+
 **Your Responsibilities:**
 1. Ask clarifying questions when the candidate makes assumptions
 2. Provide hints if the candidate is stuck, but don't give away the solution
 3. Challenge good ideas to see how deep their understanding goes
 4. Keep the conversation flowing naturally
 5. Be encouraging but honest about concerns
-6. If they go off track, gently guide them back
+6. If they go off track, gently guide them back to the interview topic
 7. Adapt your questioning based on their responses
 
 **CRITICAL: NEVER PROVIDE COMPLETE SOLUTIONS**
@@ -201,7 +209,11 @@ ${scenario.prompt}
 `
 
     case 'coding':
-      return basePrompt + `
+      const codeContext = codeSubmission?.code
+        ? `\n**Current Code in Editor:**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n\n- You can see their code above. Reference it when discussing their approach.\n- Ask specific questions about their implementation\n- Point out potential issues or edge cases in their code\n- If they haven't started coding yet, encourage them to begin\n`
+        : '\n**Note:** The candidate hasn\'t written any code yet. Encourage them to start coding their solution.\n'
+
+      return basePrompt + codeContext + `
 **Coding Interview Guidance:**
 - Start by ensuring they understand the problem
 - Ask them to think aloud as they code
@@ -210,6 +222,7 @@ ${scenario.prompt}
 - If they finish, ask: "Can you optimize this further?"
 - Discuss testing: "How would you test this?"
 - Be okay with pseudocode initially, then ask them to implement
+- Reference their code in the editor when giving feedback
 
 **CRITICAL FOR CODING INTERVIEWS:**
 - NEVER provide working code or pseudocode implementations
@@ -217,6 +230,7 @@ ${scenario.prompt}
 - If truly stuck, give high-level hints only: "Think about what data structure would let you look up values quickly"
 - Let them struggle a bit - that's part of the learning process
 - Guide with questions, not solutions
+- Review their code and ask questions about specific parts: "I see you're using a loop here. What's the time complexity?"
 
 **Example Questions to Ask:**
 - "What's your initial approach?"
@@ -225,6 +239,7 @@ ${scenario.prompt}
 - "What's the time complexity of your solution?"
 - "How would you handle [specific edge case]?"
 - "Can you optimize the space complexity?"
+- "I see in your code on line X, why did you choose to do Y?"
 `
 
     case 'behavioral':
