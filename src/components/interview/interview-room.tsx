@@ -179,12 +179,14 @@ export function InterviewRoom({
       {/* Main Content - Video Call Style */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Side: Code Editor (Main Focus) */}
-        <div className="flex-1 flex flex-col border-r border-white/10">
+        <div className="flex-1 flex flex-col border-r border-white/10 overflow-hidden">
           {interviewType === 'coding' || interviewType === 'system_design' ? (
-            <InterviewWorkspace
-              interviewId={interviewId}
-              interviewType={interviewType}
-            />
+            <div className="h-full overflow-hidden">
+              <InterviewWorkspace
+                interviewId={interviewId}
+                interviewType={interviewType}
+              />
+            </div>
           ) : (
             <div className="flex-1 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
           )}

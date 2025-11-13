@@ -95,8 +95,8 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0A]">
-      <div className="border-b border-white/10 px-4 py-3 bg-white/5">
+    <div className="h-full flex flex-col bg-[#0A0A0A] overflow-hidden">
+      <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-white/5">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Code2 className="h-4 w-4 text-green-400" />
@@ -130,9 +130,9 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {/* Monaco Code Editor */}
-        <div className="flex-1 min-h-0">
+        <div className="flex-1 min-h-0 overflow-hidden">
           <Editor
             height="100%"
             language={language}
@@ -152,7 +152,7 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
         </div>
 
         {/* Output Panel - Larger and expandable */}
-        <div className="border-t border-white/10 bg-white/5 p-4 h-64 overflow-y-auto">
+        <div className="flex-shrink-0 border-t border-white/10 bg-white/5 p-4 h-64 overflow-y-auto">
           <div className="text-xs font-semibold text-gray-400 mb-2">OUTPUT</div>
           <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap">
             {output || 'Run your code to see output here...'}
