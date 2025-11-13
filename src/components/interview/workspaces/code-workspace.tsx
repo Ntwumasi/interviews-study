@@ -16,6 +16,8 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
   const [code, setCode] = useState('// Write your code here\n\n')
   const [language, setLanguage] = useState('javascript')
   const [isSaving, setIsSaving] = useState(false)
+  const [output, setOutput] = useState('')
+  const [isRunning, setIsRunning] = useState(false)
 
   // Load saved code on mount
   useEffect(() => {
@@ -62,9 +64,30 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
     return () => clearTimeout(saveTimer)
   }, [code, language, interviewId])
 
-  const handleRun = () => {
-    // TODO: Implement code execution
-    console.log('Running code:', code)
+  const handleRun = async () => {
+    setIsRunning(true)
+    setOutput('Running code...')
+
+    try {
+      const response = await fetch('/api/execute-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, language }),
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setOutput(data.output || 'No output')
+      } else {
+        setOutput(`Error: ${data.error || 'Failed to execute code'}`)
+      }
+    } catch (error) {
+      console.error('[Code] Failed to execute:', error)
+      setOutput('Error: Failed to execute code. Please try again.')
+    } finally {
+      setIsRunning(false)
+    }
   }
 
   const handleCodeChange = (value: string | undefined) => {
@@ -97,10 +120,11 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
             <Button
               size="sm"
               onClick={handleRun}
-              className="bg-green-600 hover:bg-green-700"
+              disabled={isRunning}
+              className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Play className="h-4 w-4 mr-1" />
-              Run
+              {isRunning ? 'Running...' : 'Run'}
             </Button>
           </div>
         </div>
@@ -128,11 +152,11 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
         </div>
 
         {/* Output Panel */}
-        <div className="border-t border-white/10 bg-white/5 p-4 h-32">
+        <div className="border-t border-white/10 bg-white/5 p-4 h-32 overflow-y-auto">
           <div className="text-xs font-semibold text-gray-400 mb-2">OUTPUT</div>
-          <div className="font-mono text-sm text-gray-300">
-            <p className="text-gray-500">Code execution coming soon...</p>
-          </div>
+          <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap">
+            {output || 'Run your code to see output here...'}
+          </pre>
         </div>
       </div>
     </div>
