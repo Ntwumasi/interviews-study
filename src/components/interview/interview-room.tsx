@@ -191,7 +191,7 @@ export function InterviewRoom({
         </div>
 
         {/* Right Side: Video + Chat */}
-        <div className="w-96 flex flex-col">
+        <div className="w-[30%] min-w-[400px] flex flex-col">
           {/* Video Panel */}
           <div className="flex flex-col gap-3 p-3 border-b border-white/10 bg-black/20">
             {/* AI Interviewer Video */}
