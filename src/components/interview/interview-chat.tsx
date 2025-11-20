@@ -54,6 +54,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
 
       if (!response.ok) {
         console.warn('[Voice] TTS service unavailable')
+        setIsSpeaking(false)
         return
       }
 
@@ -72,12 +73,27 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
         URL.revokeObjectURL(audioUrl)
       }
 
-      audio.onerror = () => {
+      audio.onerror = (e) => {
+        console.error('[Voice] Audio playback error:', e)
         setIsSpeaking(false)
         URL.revokeObjectURL(audioUrl)
       }
 
-      await audio.play()
+      // Try to play audio
+      const playPromise = audio.play()
+
+      if (playPromise !== undefined) {
+        playPromise.catch((error) => {
+          console.warn('[Voice] Autoplay blocked. User interaction required:', error.message)
+          setIsSpeaking(false)
+          URL.revokeObjectURL(audioUrl)
+
+          // Show user-friendly message
+          if (error.name === 'NotAllowedError') {
+            console.log('[Voice] TIP: Click anywhere on the page, then send another message')
+          }
+        })
+      }
     } catch (error) {
       console.error('[Voice] Error playing audio:', error)
       setIsSpeaking(false)

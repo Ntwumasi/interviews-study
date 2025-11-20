@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { ElevenLabsClient } from 'elevenlabs'
 
-// Initialize ElevenLabs client
-const elevenlabs = new ElevenLabsClient({
-  apiKey: process.env.ELEVENLABS_API_KEY,
-})
-
 /**
  * POST /api/text-to-speech
  * Converts text to speech using ElevenLabs
@@ -29,13 +24,19 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Initialize client for each request
+    const elevenlabs = new ElevenLabsClient({
+      apiKey: process.env.ELEVENLABS_API_KEY,
+    })
+
     // Use a professional, natural-sounding voice
     // Rachel (voice ID: 21m00Tcm4TlvDq8ikWAM) - Calm, professional female voice
     const voiceId = '21m00Tcm4TlvDq8ikWAM'
 
-    // Generate speech
-    const audio = await elevenlabs.generate({
-      voice: voiceId,
+    console.log('[TTS] Generating speech for text length:', text.length)
+
+    // Generate speech using the correct API
+    const audio = await elevenlabs.textToSpeech.convert(voiceId, {
       text: text,
       model_id: 'eleven_monolingual_v1',
     })
@@ -47,17 +48,20 @@ export async function POST(request: NextRequest) {
     }
     const buffer = Buffer.concat(chunks)
 
+    console.log('[TTS] Generated audio buffer size:', buffer.length)
+
     // Return audio as MP3
     return new NextResponse(buffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
         'Content-Length': buffer.length.toString(),
+        'Cache-Control': 'no-cache',
       },
     })
-  } catch (error) {
-    console.error('[TTS] Error generating speech:', error)
+  } catch (error: any) {
+    console.error('[TTS] Error generating speech:', error.message || error)
     return NextResponse.json(
-      { error: 'Failed to generate speech' },
+      { error: `Failed to generate speech: ${error.message}` },
       { status: 500 }
     )
   }
