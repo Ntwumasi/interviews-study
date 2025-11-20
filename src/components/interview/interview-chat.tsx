@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TranscriptMessage } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Send, Volume2, VolumeX } from 'lucide-react'
+import { Send, Volume2, VolumeX, Mic, MicOff } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 interface InterviewChatProps {
@@ -16,10 +16,53 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
   const [isLoading, setIsLoading] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
   const [isSpeaking, setIsSpeaking] = useState(false)
+  const [isListening, setIsListening] = useState(false)
+  const [speechSupported, setSpeechSupported] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const lastMessageCountRef = useRef(0)
+  const recognitionRef = useRef<any>(null)
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition
+      if (SpeechRecognition) {
+        setSpeechSupported(true)
+        const recognition = new SpeechRecognition()
+        recognition.continuous = false
+        recognition.interimResults = true
+        recognition.lang = 'en-US'
+
+        recognition.onresult = (event: any) => {
+          const transcript = Array.from(event.results)
+            .map((result: any) => result[0])
+            .map((result) => result.transcript)
+            .join('')
+
+          setInput(transcript)
+        }
+
+        recognition.onend = () => {
+          setIsListening(false)
+        }
+
+        recognition.onerror = (event: any) => {
+          console.error('[Speech] Recognition error:', event.error)
+          setIsListening(false)
+        }
+
+        recognitionRef.current = recognition
+      }
+    }
+
+    return () => {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop()
+      }
+    }
+  }, [])
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -108,6 +151,26 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
     setVoiceEnabled(!voiceEnabled)
   }
 
+  const toggleMicrophone = () => {
+    if (!speechSupported || !recognitionRef.current) {
+      console.warn('[Speech] Speech recognition not supported')
+      return
+    }
+
+    if (isListening) {
+      recognitionRef.current.stop()
+      setIsListening(false)
+    } else {
+      try {
+        recognitionRef.current.start()
+        setIsListening(true)
+      } catch (error) {
+        console.error('[Speech] Failed to start recognition:', error)
+        setIsListening(false)
+      }
+    }
+  }
+
   // Auto-resize textarea
   useEffect(() => {
     if (textareaRef.current) {
@@ -143,7 +206,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
   return (
     <div className="h-full flex flex-col">
       {/* Voice Control Header */}
-      <div className="flex items-center justify-end px-4 py-2 border-b border-white/10 bg-white/5">
+      <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-white/10 bg-white/5">
         <Button
           variant="ghost"
           size="sm"
@@ -164,6 +227,28 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
             </>
           )}
         </Button>
+
+        {speechSupported && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={toggleMicrophone}
+            className={`text-xs ${isListening ? 'text-red-400 animate-pulse' : 'text-gray-500'}`}
+            title={isListening ? 'Stop Recording' : 'Start Voice Input'}
+          >
+            {isListening ? (
+              <>
+                <Mic className="h-4 w-4 mr-1" />
+                <span>Listening...</span>
+              </>
+            ) : (
+              <>
+                <MicOff className="h-4 w-4 mr-1" />
+                <span>Microphone</span>
+              </>
+            )}
+          </Button>
+        )}
       </div>
 
       {/* Messages */}
@@ -215,7 +300,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your response... (Shift+Enter for new line)"
+            placeholder={speechSupported ? "Type or click microphone to speak... (Shift+Enter for new line)" : "Type your response... (Shift+Enter for new line)"}
             className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px] max-h-[200px]"
             disabled={isLoading}
             rows={1}

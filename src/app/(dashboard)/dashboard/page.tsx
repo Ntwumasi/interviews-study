@@ -101,14 +101,14 @@ export default async function DashboardPage() {
   const pastInterviews = await getPastInterviews(userId)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
         {/* Header */}
         <div className="mb-8 sm:mb-10 md:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white mb-3 sm:mb-4">
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
             Choose Your Interview
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-400">
+          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400">
             Select an interview type and difficulty level to start practicing
           </p>
         </div>
@@ -120,7 +120,7 @@ export default async function DashboardPage() {
             return (
               <div
                 key={type.id}
-                className={`bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border transition-all ${type.borderColor} ${type.bgColor}`}
+                className={`bg-white dark:bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border transition-all ${type.borderColor} ${type.bgColor} shadow-lg dark:shadow-none`}
               >
                 {/* Icon and Header */}
                 <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
@@ -128,23 +128,23 @@ export default async function DashboardPage() {
                     <Icon className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 ${type.iconColor}`} />
                   </div>
                   <div className="flex-1">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-white mb-0.5 sm:mb-1">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
                       {type.name}
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-400">
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
                       {type.duration} minutes • Video recorded
                     </p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base text-gray-300 mb-4 sm:mb-5 md:mb-6 leading-relaxed min-h-[3.5rem] sm:min-h-[4.5rem]">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-5 md:mb-6 leading-relaxed min-h-[3.5rem] sm:min-h-[4.5rem]">
                   {type.description}
                 </p>
 
                 {/* Difficulty Selection */}
                 <div className="space-y-2 sm:space-y-3">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-400 uppercase tracking-wide">
+                  <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                     Choose Difficulty
                   </p>
                   <div className="space-y-1.5 sm:space-y-2">
@@ -162,8 +162,8 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Info Footer */}
-                <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-white/10">
-                  <p className="text-xs text-gray-500">
+                <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-gray-300 dark:border-white/10">
+                  <p className="text-xs text-gray-600 dark:text-gray-500">
                     Practice with realistic scenarios and get detailed AI feedback
                   </p>
                 </div>
@@ -179,7 +179,7 @@ export default async function DashboardPage() {
 
         {/* Help Text */}
         <div className="mt-8 sm:mt-10 md:mt-12 text-center">
-          <p className="text-gray-400 text-xs sm:text-sm px-4">
+          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm px-4">
             Not sure where to start? We recommend Medium difficulty for most users.
           </p>
         </div>
