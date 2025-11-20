@@ -40,15 +40,18 @@ export function InterviewDifficultyButton({
   return (
     <Button
       variant="ghost"
-      className={`w-full justify-start text-left ${buttonHoverClass} border border-white/10 text-sm sm:text-base py-2 sm:py-2.5 h-auto`}
+      className={`w-full justify-between items-center text-left ${buttonHoverClass} border-2 border-gray-300 dark:border-white/10 text-sm sm:text-base py-3 sm:py-3.5 px-4 h-auto rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]`}
       onClick={handleClick}
     >
-      <span className={`font-semibold ${difficultyColor}`}>
-        {difficultyLabel}
-      </span>
-      <span className="text-gray-400 text-xs sm:text-sm ml-2">
-        - AI picks a scenario
-      </span>
+      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
+        <span className={`font-bold ${difficultyColor} text-base sm:text-lg`}>
+          {difficultyLabel}
+        </span>
+        <span className="text-gray-500 dark:text-gray-400 text-xs sm:text-sm">
+          AI picks scenario
+        </span>
+      </div>
+      <span className="text-2xl sm:text-3xl">→</span>
     </Button>
   )
 }

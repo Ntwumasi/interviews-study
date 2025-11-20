@@ -102,52 +102,58 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
         {/* Header */}
-        <div className="mb-8 sm:mb-10 md:mb-12">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-3 sm:mb-4">
+        <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-2 sm:mb-3 md:mb-4 leading-tight">
             Choose Your Interview
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400">
+          <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto sm:mx-0">
             Select an interview type and difficulty level to start practicing
           </p>
         </div>
 
         {/* Interview Type Cards */}
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 lg:gap-8 mb-8 sm:mb-10 md:mb-12">
           {INTERVIEW_TYPES.map((type) => {
             const Icon = type.icon
             return (
               <div
                 key={type.id}
-                className={`bg-white dark:bg-white/5 backdrop-blur-sm rounded-xl sm:rounded-2xl p-5 sm:p-6 md:p-8 border transition-all ${type.borderColor} ${type.bgColor} shadow-lg dark:shadow-none`}
+                className={`bg-white dark:bg-white/5 backdrop-blur-sm rounded-2xl md:rounded-3xl p-5 sm:p-6 md:p-7 lg:p-8 border-2 transition-all hover:scale-[1.02] active:scale-[0.98] ${type.borderColor} ${type.bgColor} shadow-lg hover:shadow-xl dark:shadow-none`}
               >
                 {/* Icon and Header */}
-                <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5 md:mb-6">
-                  <div className={`p-2.5 sm:p-3 md:p-4 rounded-lg sm:rounded-xl ${type.iconBg}`}>
-                    <Icon className={`w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 ${type.iconColor}`} />
+                <div className="flex items-start gap-3 sm:gap-4 mb-4 sm:mb-5">
+                  <div className={`p-3 sm:p-3.5 md:p-4 rounded-xl sm:rounded-2xl ${type.iconBg} flex-shrink-0`}>
+                    <Icon className={`w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 lg:w-9 lg:h-9 ${type.iconColor}`} />
                   </div>
-                  <div className="flex-1">
-                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-0.5 sm:mb-1">
+                  <div className="flex-1 min-w-0">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-1 leading-tight">
                       {type.name}
                     </h2>
-                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">
-                      {type.duration} minutes • Video recorded
+                    <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 flex items-center gap-1.5">
+                      <span className="inline-flex items-center gap-1">
+                        ⏱️ {type.duration} min
+                      </span>
+                      <span className="text-gray-400 dark:text-gray-600">•</span>
+                      <span className="inline-flex items-center gap-1">
+                        📹 Recorded
+                      </span>
                     </p>
                   </div>
                 </div>
 
                 {/* Description */}
-                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-4 sm:mb-5 md:mb-6 leading-relaxed min-h-[3.5rem] sm:min-h-[4.5rem]">
+                <p className="text-sm sm:text-base text-gray-700 dark:text-gray-300 mb-5 sm:mb-6 leading-relaxed line-clamp-3 sm:line-clamp-none">
                   {type.description}
                 </p>
 
                 {/* Difficulty Selection */}
-                <div className="space-y-2 sm:space-y-3">
-                  <p className="text-xs sm:text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-                    Choose Difficulty
+                <div className="space-y-2.5 sm:space-y-3">
+                  <p className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">
+                    Select Difficulty
                   </p>
-                  <div className="space-y-1.5 sm:space-y-2">
+                  <div className="space-y-2 sm:space-y-2.5">
                     {DIFFICULTY_LEVELS.map((difficulty) => (
                       <InterviewDifficultyButton
                         key={difficulty.value}
@@ -162,9 +168,9 @@ export default async function DashboardPage() {
                 </div>
 
                 {/* Info Footer */}
-                <div className="mt-4 sm:mt-5 md:mt-6 pt-4 sm:pt-5 md:pt-6 border-t border-gray-300 dark:border-white/10">
-                  <p className="text-xs text-gray-600 dark:text-gray-500">
-                    Practice with realistic scenarios and get detailed AI feedback
+                <div className="mt-5 sm:mt-6 pt-4 sm:pt-5 border-t border-gray-300 dark:border-white/10">
+                  <p className="text-xs sm:text-sm text-gray-600 dark:text-gray-500 leading-relaxed">
+                    💡 Practice with realistic scenarios and get detailed AI feedback
                   </p>
                 </div>
               </div>
@@ -178,10 +184,13 @@ export default async function DashboardPage() {
         )}
 
         {/* Help Text */}
-        <div className="mt-8 sm:mt-10 md:mt-12 text-center">
-          <p className="text-gray-600 dark:text-gray-400 text-xs sm:text-sm px-4">
-            Not sure where to start? We recommend Medium difficulty for most users.
-          </p>
+        <div className="mt-6 sm:mt-8 md:mt-10 text-center">
+          <div className="inline-flex items-center gap-2 px-4 py-3 sm:px-6 sm:py-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-500/30 rounded-2xl">
+            <span className="text-2xl">💡</span>
+            <p className="text-gray-700 dark:text-gray-300 text-sm sm:text-base font-medium">
+              Not sure where to start? Try <span className="font-bold text-blue-600 dark:text-blue-400">Medium</span> difficulty
+            </p>
+          </div>
         </div>
       </div>
     </div>
