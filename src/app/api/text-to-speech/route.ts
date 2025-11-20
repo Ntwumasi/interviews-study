@@ -36,9 +36,10 @@ export async function POST(request: NextRequest) {
     console.log('[TTS] Generating speech for text length:', text.length)
 
     // Generate speech using the correct API
+    // Using eleven_turbo_v2_5 which is available on the free tier
     const audio = await elevenlabs.textToSpeech.convert(voiceId, {
       text: text,
-      model_id: 'eleven_monolingual_v1',
+      model_id: 'eleven_turbo_v2_5',
     })
 
     // Convert audio stream to buffer
