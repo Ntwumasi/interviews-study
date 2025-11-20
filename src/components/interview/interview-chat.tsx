@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { TranscriptMessage } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Send } from 'lucide-react'
+import { Send, Volume2, VolumeX } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 interface InterviewChatProps {
@@ -14,13 +14,83 @@ interface InterviewChatProps {
 export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [voiceEnabled, setVoiceEnabled] = useState(true)
+  const [isSpeaking, setIsSpeaking] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const audioRef = useRef<HTMLAudioElement | null>(null)
+  const lastMessageCountRef = useRef(0)
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [transcript])
+
+  // Play voice for new AI messages
+  useEffect(() => {
+    if (!voiceEnabled || transcript.length === 0) return
+
+    // Check if there's a new AI message
+    if (transcript.length > lastMessageCountRef.current) {
+      const lastMessage = transcript[transcript.length - 1]
+
+      if (lastMessage.role === 'assistant') {
+        playVoice(lastMessage.content)
+      }
+    }
+
+    lastMessageCountRef.current = transcript.length
+  }, [transcript, voiceEnabled])
+
+  const playVoice = async (text: string) => {
+    try {
+      setIsSpeaking(true)
+
+      const response = await fetch('/api/text-to-speech', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }),
+      })
+
+      if (!response.ok) {
+        console.warn('[Voice] TTS service unavailable')
+        return
+      }
+
+      const audioBlob = await response.blob()
+      const audioUrl = URL.createObjectURL(audioBlob)
+
+      if (audioRef.current) {
+        audioRef.current.pause()
+      }
+
+      const audio = new Audio(audioUrl)
+      audioRef.current = audio
+
+      audio.onended = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(audioUrl)
+      }
+
+      audio.onerror = () => {
+        setIsSpeaking(false)
+        URL.revokeObjectURL(audioUrl)
+      }
+
+      await audio.play()
+    } catch (error) {
+      console.error('[Voice] Error playing audio:', error)
+      setIsSpeaking(false)
+    }
+  }
+
+  const toggleVoice = () => {
+    if (voiceEnabled && audioRef.current) {
+      audioRef.current.pause()
+      setIsSpeaking(false)
+    }
+    setVoiceEnabled(!voiceEnabled)
+  }
 
   // Auto-resize textarea
   useEffect(() => {
@@ -56,6 +126,30 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
 
   return (
     <div className="h-full flex flex-col">
+      {/* Voice Control Header */}
+      <div className="flex items-center justify-end px-4 py-2 border-b border-white/10 bg-white/5">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={toggleVoice}
+          className={`text-xs ${voiceEnabled ? 'text-blue-400' : 'text-gray-500'}`}
+          title={voiceEnabled ? 'Mute AI Voice' : 'Unmute AI Voice'}
+        >
+          {voiceEnabled ? (
+            <>
+              <Volume2 className="h-4 w-4 mr-1" />
+              {isSpeaking && <span className="animate-pulse">Speaking...</span>}
+              {!isSpeaking && <span>Voice On</span>}
+            </>
+          ) : (
+            <>
+              <VolumeX className="h-4 w-4 mr-1" />
+              <span>Voice Off</span>
+            </>
+          )}
+        </Button>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-6 space-y-4">
         {transcript.map((message, index) => (
