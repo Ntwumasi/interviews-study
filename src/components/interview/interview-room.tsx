@@ -10,6 +10,7 @@ import { InterviewWorkspace } from './interview-workspace'
 import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
   Dialog,
@@ -159,6 +160,7 @@ export function InterviewRoom({
           </div>
 
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <InterviewTimer
               durationMinutes={durationMinutes}
               startedAt={startedAt}

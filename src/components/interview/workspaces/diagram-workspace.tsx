@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { Pencil, Save } from 'lucide-react'
+import '@excalidraw/excalidraw/index.css'
 
 interface DiagramWorkspaceProps {
   interviewId: string
@@ -12,6 +13,26 @@ export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
   const [lastSaved, setLastSaved] = useState<Date | null>(null)
+  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
+
+  // Listen for theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      setTheme(isDark ? 'dark' : 'light')
+    }
+
+    updateTheme()
+
+    // Listen for theme changes
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Load Excalidraw dynamically
   useEffect(() => {
@@ -96,10 +117,10 @@ export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
           <ExcalidrawComponent
             excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
             onChange={handleChange}
-            theme="dark"
+            theme={theme}
             initialData={{
               appState: {
-                viewBackgroundColor: '#121212',
+                viewBackgroundColor: theme === 'dark' ? '#121212' : '#ffffff',
               },
             }}
           />
