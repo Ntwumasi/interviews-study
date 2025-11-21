@@ -207,18 +207,18 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
   return (
     <div className="h-full flex flex-col">
       {/* Chat Header */}
-      <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-black/20">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-100 dark:bg-black/20">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-blue-400" />
-            <h3 className="text-sm font-semibold text-white">Interview Chat</h3>
+            <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Interview Chat</h3>
           </div>
           <div className="flex items-center gap-2">
             <Button
               variant="ghost"
               size="sm"
               onClick={toggleVoice}
-              className={`h-8 w-8 p-0 ${voiceEnabled ? 'text-blue-400' : 'text-gray-500'}`}
+              className={`h-8 w-8 p-0 ${voiceEnabled ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-500'}`}
               title={voiceEnabled ? 'Mute AI Voice' : 'Unmute AI Voice'}
             >
               {voiceEnabled ? (
@@ -241,12 +241,12 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
                 message.role === 'user'
-                  ? 'bg-white/10 text-white'
-                  : 'bg-white/5 text-gray-200'
+                  ? 'bg-blue-600 dark:bg-white/10 text-white'
+                  : 'bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-gray-200'
               }`}
             >
               {message.role === 'assistant' ? (
-                <div className="prose prose-invert prose-sm max-w-none">
+                <div className="prose dark:prose-invert prose-sm max-w-none">
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               ) : (
@@ -257,12 +257,12 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
         ))}
         {isLoading && (
           <div className="flex justify-start">
-            <div className="bg-white/5 text-gray-400 border border-white/10 rounded-lg px-4 py-3">
+            <div className="bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3">
               <div className="flex items-center gap-2">
                 <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
                 <span className="text-sm">AI is thinking...</span>
               </div>
@@ -273,7 +273,7 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
       </div>
 
       {/* Input */}
-      <div className="border-t border-white/10 p-3 bg-black/30 backdrop-blur-sm">
+      <div className="border-t border-gray-200 dark:border-white/10 p-3 bg-gray-50 dark:bg-black/30 backdrop-blur-sm">
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             ref={textareaRef}
@@ -281,7 +281,7 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="Type your response..."
-            className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-white/20 resize-none min-h-[48px] max-h-[200px]"
+            className="w-full bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl pl-4 pr-12 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-white/20 resize-none min-h-[48px] max-h-[200px]"
             disabled={isLoading}
             rows={1}
           />
@@ -291,7 +291,7 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
             <Button
               type="submit"
               disabled={isLoading}
-              className="absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"
+              className="absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 flex items-center justify-center text-gray-700 dark:text-white"
               variant="ghost"
             >
               <Send className="h-4 w-4" />
@@ -303,13 +303,13 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
               disabled={!speechSupported}
               className={`absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg flex items-center justify-center ${
                 isListening
-                  ? 'bg-red-500/20 hover:bg-red-500/30'
-                  : 'bg-white/10 hover:bg-white/20'
+                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-600 dark:text-red-400'
+                  : 'bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-white'
               } disabled:opacity-30`}
               variant="ghost"
             >
               {isListening ? (
-                <Mic className="h-4 w-4 text-red-400 animate-pulse" />
+                <Mic className="h-4 w-4 animate-pulse" />
               ) : (
                 <Mic className="h-4 w-4" />
               )}

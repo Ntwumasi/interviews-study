@@ -276,7 +276,7 @@ export function InterviewRoom({
             </div>
 
             {/* Chat Area - 25% width (col-3 equivalent) */}
-            <div className="w-3/12 flex-shrink-0 border-r border-white/10 bg-black/20">
+            <div className="w-3/12 flex-shrink-0 border-r border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20">
               <InterviewChat
                 transcript={transcript}
                 onSendMessage={handleSendMessage}
@@ -285,19 +285,19 @@ export function InterviewRoom({
             </div>
 
             {/* Video Area - 16.67% width (col-2 equivalent) */}
-            <div className="w-2/12 flex-shrink-0 flex flex-col bg-black/20">
+            <div className="w-2/12 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-black/20">
               {/* Video Header */}
-              <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-black/20">
+              <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-100 dark:bg-black/20">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-purple-400" />
-                    <h3 className="text-sm font-semibold text-white">Video</h3>
+                    <Video className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Video</h3>
                   </div>
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={() => setIsMicMuted(!isMicMuted)}
-                    className={`h-8 w-8 p-0 ${isMicMuted ? 'text-gray-500' : 'text-purple-400'}`}
+                    className={`h-8 w-8 p-0 ${isMicMuted ? 'text-gray-500 dark:text-gray-500' : 'text-purple-600 dark:text-purple-400'}`}
                     title={isMicMuted ? 'Unmute AI' : 'Mute AI'}
                   >
                     {isMicMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}

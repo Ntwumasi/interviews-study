@@ -118,7 +118,7 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
   return (
     <div className="h-full w-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] bg-white">
       {/* Header - Fixed Position */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-3 py-2.5 bg-gray-50 dark:bg-[#252526] shadow-lg z-10">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-50 dark:bg-black/20 shadow-lg z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Code2 className="h-4 w-4 text-green-600 dark:text-green-400" />
