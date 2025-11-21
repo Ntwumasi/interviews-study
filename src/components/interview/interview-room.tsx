@@ -7,12 +7,10 @@ import { DURATION_BY_TYPE } from '@/types'
 import { InterviewTimer } from './interview-timer'
 import { InterviewChat } from './interview-chat'
 import { InterviewWorkspace } from './interview-workspace'
-import { InterviewBottomPanel } from './interview-bottom-panel'
 import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { MessageSquare } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -220,12 +218,12 @@ export function InterviewRoom({
           </div>
         </div>
 
-        {/* Desktop Layout - Grid with Editor, Cameras, and Bottom Panel */}
-        <div className="hidden md:flex md:flex-col h-full">
-          {/* Top Section: Editor (col-10) + Cameras (col-2) */}
-          <div className="flex-1 flex overflow-hidden">
-            {/* Editor Area - 83% width (col-10 equivalent) */}
-            <div className="flex-1 min-w-0 bg-[#1e1e1e] border-r border-white/10">
+        {/* Desktop Layout - 3 Column: Editor (col-8) + Chat (col-2) + Video (col-2) */}
+        <div className="hidden md:flex h-full">
+          {/* Editor Area - 66.67% width (col-8 equivalent) */}
+          <div className="w-2/3 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
+            {/* Editor */}
+            <div className="flex-1 overflow-hidden">
               {interviewType === 'coding' || interviewType === 'system_design' ? (
                 <InterviewWorkspace
                   interviewId={interviewId}
@@ -238,35 +236,53 @@ export function InterviewRoom({
               )}
             </div>
 
-            {/* Cameras Area - 17% width (col-2 equivalent) */}
-            <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
-              {/* AI Interviewer Video */}
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                  <p className="text-xs font-medium text-white">AI Interviewer</p>
+            {/* Output Panel - Only for coding */}
+            {interviewType === 'coding' && (
+              <div className="h-60 flex-shrink-0 border-t border-white/10 bg-[#1e1e1e]">
+                <div className="h-full flex flex-col">
+                  <div className="flex-shrink-0 px-4 py-2 border-b border-white/10 bg-[#252526] flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Output</div>
+                      {isRunningCode && (
+                        <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex-1 overflow-y-auto p-4">
+                    <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                      {codeOutput || 'Run your code to see output here...'}
+                    </pre>
+                  </div>
                 </div>
               </div>
-
-              {/* User Camera */}
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                <UserCamera />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                  <p className="text-xs font-medium text-white">You</p>
-                </div>
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Bottom Section: Chat + Output - Full Width */}
-          <div className="h-80 flex-shrink-0 border-t border-white/10">
-            <InterviewBottomPanel
+          {/* Chat Area - 16.67% width (col-2 equivalent) */}
+          <div className="w-1/6 flex-shrink-0 border-r border-white/10 bg-black/20">
+            <InterviewChat
               transcript={transcript}
               onSendMessage={handleSendMessage}
-              codeOutput={codeOutput}
-              isRunning={isRunningCode}
-              showOutput={interviewType === 'coding'}
             />
+          </div>
+
+          {/* Video Area - 16.67% width (col-2 equivalent) */}
+          <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
+            {/* AI Interviewer Video */}
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+              <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                <p className="text-xs font-medium text-white">AI Interviewer</p>
+              </div>
+            </div>
+
+            {/* User Camera */}
+            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+              <UserCamera />
+              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                <p className="text-xs font-medium text-white">You</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
