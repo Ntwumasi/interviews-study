@@ -18,6 +18,27 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
   const [code, setCode] = useState('// Write your code here\n\n')
   const [language, setLanguage] = useState('javascript')
   const [isSaving, setIsSaving] = useState(false)
+  const [theme, setTheme] = useState<'vs-dark' | 'light'>('vs-dark')
+
+  // Listen for theme changes
+  useEffect(() => {
+    const updateTheme = () => {
+      const isDark = document.documentElement.classList.contains('dark')
+      setTheme(isDark ? 'vs-dark' : 'light')
+    }
+
+    // Initial check
+    updateTheme()
+
+    // Watch for theme changes
+    const observer = new MutationObserver(updateTheme)
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class'],
+    })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Load saved code on mount
   useEffect(() => {
@@ -95,22 +116,22 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
   }
 
   return (
-    <div className="h-full w-full flex flex-col bg-[#1e1e1e]">
+    <div className="h-full w-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] bg-white">
       {/* Header - Fixed Position */}
-      <div className="flex-shrink-0 border-b border-white/10 px-3 py-2.5 bg-[#252526] shadow-lg z-10">
+      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-3 py-2.5 bg-gray-50 dark:bg-[#252526] shadow-lg z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Code2 className="h-4 w-4 text-green-400" />
-            <h3 className="text-sm font-semibold text-white">Code Editor</h3>
+            <Code2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Code Editor</h3>
             {isSaving && (
-              <span className="text-xs text-gray-400 animate-pulse">Saving...</span>
+              <span className="text-xs text-gray-600 dark:text-gray-400 animate-pulse">Saving...</span>
             )}
           </div>
           <div className="flex items-center gap-2">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="bg-[#3c3c3c] border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-white dark:bg-[#3c3c3c] border border-gray-300 dark:border-white/10 rounded px-2 py-1 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
@@ -138,7 +159,7 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
           language={language}
           value={code}
           onChange={handleCodeChange}
-          theme="vs-dark"
+          theme={theme}
           options={{
             minimap: { enabled: false },
             fontSize: 13,

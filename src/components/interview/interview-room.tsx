@@ -161,14 +161,14 @@ export function InterviewRoom({
   }, [])
 
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
       {/* Modern Header - Sleek & Spacious */}
-      <div className="border-b border-white/10 bg-black/20 backdrop-blur-xl">
+      <div className="border-b border-gray-200 dark:border-white/10 bg-white/90 dark:bg-black/20 backdrop-blur-xl">
         <div className="px-6 py-4 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div>
-              <h1 className="text-xl font-semibold text-white tracking-tight">{scenario.title}</h1>
-              <p className="text-sm text-gray-400 mt-0.5">
+              <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">{scenario.title}</h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
                 {interviewType.replace('_', ' ').charAt(0).toUpperCase() +
                   interviewType.replace('_', ' ').slice(1)} • {scenario.difficulty}
               </p>
@@ -235,7 +235,7 @@ export function InterviewRoom({
           /* Desktop Layout - 3 Column: Editor (col-7) + Chat (col-3) + Video (col-2) */
           <div className="flex h-full">
             {/* Editor Area - 58.33% width (col-7 equivalent) */}
-            <div className="w-7/12 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
+            <div className="w-7/12 min-w-0 bg-white dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-white/10 flex flex-col">
               {/* Editor */}
               <div className="flex-1 overflow-hidden">
                 {interviewType === 'coding' || interviewType === 'system_design' ? (
@@ -252,18 +252,18 @@ export function InterviewRoom({
 
               {/* Output Panel - Only for coding */}
               {interviewType === 'coding' && (
-                <div className="h-60 flex-shrink-0 border-t border-white/10 bg-[#1e1e1e]">
+                <div className="h-60 flex-shrink-0 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#1e1e1e]">
                   <div className="h-full flex flex-col">
-                    <div className="flex-shrink-0 px-4 py-2 border-b border-white/10 bg-[#252526] flex items-center justify-between">
+                    <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#252526] flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Output</div>
+                        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Output</div>
                         {isRunningCode && (
                           <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
                         )}
                       </div>
                     </div>
                     <div className="flex-1 overflow-y-auto p-4">
-                      <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                      <pre className="font-mono text-sm text-gray-900 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
                         {codeOutput || 'Run your code to see output here...'}
                       </pre>
                     </div>
@@ -285,17 +285,11 @@ export function InterviewRoom({
               {/* AI Interviewer Video - Square */}
               <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                  <p className="text-xs font-medium text-white">Poku</p>
-                </div>
               </div>
 
               {/* User Camera - Square */}
               <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <UserCamera />
-                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                  <p className="text-xs font-medium text-white">You</p>
-                </div>
               </div>
             </div>
           </div>

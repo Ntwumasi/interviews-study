@@ -205,52 +205,6 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
 
   return (
     <div className="h-full flex flex-col">
-      {/* Voice Control Header */}
-      <div className="flex items-center justify-end gap-2 px-4 py-2 border-b border-white/10 bg-white/5">
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={toggleVoice}
-          className={`text-xs ${voiceEnabled ? 'text-blue-400' : 'text-gray-500'}`}
-          title={voiceEnabled ? 'Mute AI Voice' : 'Unmute AI Voice'}
-        >
-          {voiceEnabled ? (
-            <>
-              <Volume2 className="h-4 w-4 mr-1" />
-              {isSpeaking && <span className="animate-pulse">Speaking...</span>}
-              {!isSpeaking && <span>Voice On</span>}
-            </>
-          ) : (
-            <>
-              <VolumeX className="h-4 w-4 mr-1" />
-              <span>Voice Off</span>
-            </>
-          )}
-        </Button>
-
-        {speechSupported && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={toggleMicrophone}
-            className={`text-xs ${isListening ? 'text-red-400 animate-pulse' : 'text-gray-500'}`}
-            title={isListening ? 'Stop Recording' : 'Start Voice Input'}
-          >
-            {isListening ? (
-              <>
-                <Mic className="h-4 w-4 mr-1" />
-                <span>Listening...</span>
-              </>
-            ) : (
-              <>
-                <MicOff className="h-4 w-4 mr-1" />
-                <span>Microphone</span>
-              </>
-            )}
-          </Button>
-        )}
-      </div>
-
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {transcript.map((message, index) => (
@@ -300,7 +254,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask anything"
+            placeholder="Type your response..."
             className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-white/20 resize-none min-h-[48px] max-h-[200px]"
             disabled={isLoading}
             rows={1}
@@ -311,7 +265,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
             <Button
               type="submit"
               disabled={isLoading}
-              className="absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20"
+              className="absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center"
               variant="ghost"
             >
               <Send className="h-4 w-4" />
@@ -321,7 +275,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
               type="button"
               onClick={toggleMicrophone}
               disabled={!speechSupported}
-              className={`absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg ${
+              className={`absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg flex items-center justify-center ${
                 isListening
                   ? 'bg-red-500/20 hover:bg-red-500/30'
                   : 'bg-white/10 hover:bg-white/20'
