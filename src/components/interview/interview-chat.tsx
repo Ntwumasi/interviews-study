@@ -3,15 +3,16 @@
 import { useEffect, useRef, useState } from 'react'
 import { TranscriptMessage } from '@/types'
 import { Button } from '@/components/ui/button'
-import { Send, Volume2, VolumeX, Mic, MicOff } from 'lucide-react'
+import { Send, Volume2, VolumeX, Mic, MicOff, MessageSquare } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 interface InterviewChatProps {
   transcript: TranscriptMessage[]
   onSendMessage: (message: string) => void
+  aiVoiceMuted?: boolean
 }
 
-export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps) {
+export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false }: InterviewChatProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -71,7 +72,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
 
   // Play voice for new AI messages
   useEffect(() => {
-    if (!voiceEnabled || transcript.length === 0) return
+    if (!voiceEnabled || aiVoiceMuted || transcript.length === 0) return
 
     // Check if there's a new AI message
     if (transcript.length > lastMessageCountRef.current) {
@@ -83,7 +84,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
     }
 
     lastMessageCountRef.current = transcript.length
-  }, [transcript, voiceEnabled])
+  }, [transcript, voiceEnabled, aiVoiceMuted])
 
   const playVoice = async (text: string) => {
     try {
@@ -205,6 +206,31 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
 
   return (
     <div className="h-full flex flex-col">
+      {/* Chat Header */}
+      <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-black/20">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-4 w-4 text-blue-400" />
+            <h3 className="text-sm font-semibold text-white">Interview Chat</h3>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={toggleVoice}
+              className={`h-8 w-8 p-0 ${voiceEnabled ? 'text-blue-400' : 'text-gray-500'}`}
+              title={voiceEnabled ? 'Mute AI Voice' : 'Unmute AI Voice'}
+            >
+              {voiceEnabled ? (
+                <Volume2 className="h-4 w-4" />
+              ) : (
+                <VolumeX className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {transcript.map((message, index) => (

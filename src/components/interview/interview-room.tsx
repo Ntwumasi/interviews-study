@@ -11,6 +11,7 @@ import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { Video, Mic, MicOff } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -45,6 +46,7 @@ export function InterviewRoom({
   const [codeOutput, setCodeOutput] = useState('')
   const [isRunningCode, setIsRunningCode] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+  const [isMicMuted, setIsMicMuted] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -227,6 +229,7 @@ export function InterviewRoom({
                 <InterviewChat
                   transcript={transcript}
                   onSendMessage={handleSendMessage}
+                  aiVoiceMuted={isMicMuted}
                 />
               </div>
             </div>
@@ -277,19 +280,42 @@ export function InterviewRoom({
               <InterviewChat
                 transcript={transcript}
                 onSendMessage={handleSendMessage}
+                aiVoiceMuted={isMicMuted}
               />
             </div>
 
             {/* Video Area - 16.67% width (col-2 equivalent) */}
-            <div className="w-2/12 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
-              {/* AI Interviewer Video - Square */}
-              <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+            <div className="w-2/12 flex-shrink-0 flex flex-col bg-black/20">
+              {/* Video Header */}
+              <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-black/20">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Video className="h-4 w-4 text-purple-400" />
+                    <h3 className="text-sm font-semibold text-white">Video</h3>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsMicMuted(!isMicMuted)}
+                    className={`h-8 w-8 p-0 ${isMicMuted ? 'text-gray-500' : 'text-purple-400'}`}
+                    title={isMicMuted ? 'Unmute AI' : 'Mute AI'}
+                  >
+                    {isMicMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
+                  </Button>
+                </div>
               </div>
 
-              {/* User Camera - Square */}
-              <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                <UserCamera />
+              {/* Video Content */}
+              <div className="flex-1 flex flex-col gap-3 p-3">
+                {/* AI Interviewer Video - Square */}
+                <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+                  <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+                </div>
+
+                {/* User Camera - Square */}
+                <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+                  <UserCamera />
+                </div>
               </div>
             </div>
           </div>

@@ -81,7 +81,7 @@ export function AIInterviewerAvatar({ isSpeaking, interviewType }: AIInterviewer
         <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${color.gradient} ${isSpeaking ? 'animate-pulse' : ''}`} />
-            <span className="text-white text-sm font-medium">Poku</span>
+            <span className="text-white text-sm font-medium">Kingsley St Patrick</span>
           </div>
         </div>
 
