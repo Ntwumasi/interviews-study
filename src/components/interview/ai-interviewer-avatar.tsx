@@ -78,23 +78,16 @@ export function AIInterviewerAvatar({ isSpeaking, interviewType }: AIInterviewer
         </div>
 
         {/* AI Label */}
-        <div className="absolute top-6 left-6 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
+        <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
           <div className="flex items-center gap-2">
             <div className={`w-2 h-2 rounded-full bg-gradient-to-r ${color.gradient} ${isSpeaking ? 'animate-pulse' : ''}`} />
-            <span className="text-white text-sm font-medium">AI Interviewer</span>
+            <span className="text-white text-sm font-medium">Poku</span>
           </div>
-        </div>
-
-        {/* Interview Type Badge */}
-        <div className="absolute bottom-6 left-6 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
-          <span className="text-gray-300 text-xs font-medium">
-            {interviewType.replace('_', ' ').charAt(0).toUpperCase() + interviewType.replace('_', ' ').slice(1)}
-          </span>
         </div>
 
         {/* Speaking Indicator */}
         {isSpeaking && (
-          <div className="absolute bottom-6 right-6 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
+          <div className="absolute bottom-4 right-4 bg-black/50 backdrop-blur-sm px-3 py-2 rounded-lg border border-white/10">
             <div className="flex items-center gap-2">
               <div className="flex gap-1">
                 <div className={`w-1 h-3 bg-gradient-to-t ${color.gradient} rounded-full animate-pulse`} />

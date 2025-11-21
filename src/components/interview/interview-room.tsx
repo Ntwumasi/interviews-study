@@ -232,10 +232,10 @@ export function InterviewRoom({
             </div>
           </div>
         ) : (
-          /* Desktop Layout - 3 Column: Editor (col-8) + Chat (col-2) + Video (col-2) */
+          /* Desktop Layout - 3 Column: Editor (col-7) + Chat (col-3) + Video (col-2) */
           <div className="flex h-full">
-            {/* Editor Area - 66.67% width (col-8 equivalent) */}
-            <div className="w-2/3 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
+            {/* Editor Area - 58.33% width (col-7 equivalent) */}
+            <div className="w-7/12 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
               {/* Editor */}
               <div className="flex-1 overflow-hidden">
                 {interviewType === 'coding' || interviewType === 'system_design' ? (
@@ -272,8 +272,8 @@ export function InterviewRoom({
               )}
             </div>
 
-            {/* Chat Area - 16.67% width (col-2 equivalent) */}
-            <div className="w-1/6 flex-shrink-0 border-r border-white/10 bg-black/20">
+            {/* Chat Area - 25% width (col-3 equivalent) */}
+            <div className="w-3/12 flex-shrink-0 border-r border-white/10 bg-black/20">
               <InterviewChat
                 transcript={transcript}
                 onSendMessage={handleSendMessage}
@@ -281,17 +281,17 @@ export function InterviewRoom({
             </div>
 
             {/* Video Area - 16.67% width (col-2 equivalent) */}
-            <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
-              {/* AI Interviewer Video */}
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+            <div className="w-2/12 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
+              {/* AI Interviewer Video - Square */}
+              <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                  <p className="text-xs font-medium text-white">AI Interviewer</p>
+                  <p className="text-xs font-medium text-white">Poku</p>
                 </div>
               </div>
 
-              {/* User Camera */}
-              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+              {/* User Camera - Square */}
+              <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <UserCamera />
                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
                   <p className="text-xs font-medium text-white">You</p>

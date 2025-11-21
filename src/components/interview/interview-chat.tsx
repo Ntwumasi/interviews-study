@@ -252,17 +252,17 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {transcript.map((message, index) => (
           <div
             key={index}
             className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
           >
             <div
-              className={`max-w-[80%] rounded-lg px-4 py-3 ${
+              className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
                 message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-white/5 text-gray-200 border border-white/10'
+                  ? 'bg-white/10 text-white'
+                  : 'bg-white/5 text-gray-200'
               }`}
             >
               {message.role === 'assistant' ? (
@@ -270,7 +270,7 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
                   <ReactMarkdown>{message.content}</ReactMarkdown>
                 </div>
               ) : (
-                <p className="whitespace-pre-wrap">{message.content}</p>
+                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
               )}
             </div>
           </div>
@@ -305,14 +305,36 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
             disabled={isLoading}
             rows={1}
           />
-          <Button
-            type="submit"
-            disabled={!input.trim() || isLoading}
-            className="absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30"
-            variant="ghost"
-          >
-            <Send className="h-4 w-4" />
-          </Button>
+
+          {/* Dynamic Icon: Voice when empty, Send when typing */}
+          {input.trim() ? (
+            <Button
+              type="submit"
+              disabled={isLoading}
+              className="absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20"
+              variant="ghost"
+            >
+              <Send className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              onClick={toggleMicrophone}
+              disabled={!speechSupported}
+              className={`absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg ${
+                isListening
+                  ? 'bg-red-500/20 hover:bg-red-500/30'
+                  : 'bg-white/10 hover:bg-white/20'
+              } disabled:opacity-30`}
+              variant="ghost"
+            >
+              {isListening ? (
+                <Mic className="h-4 w-4 text-red-400 animate-pulse" />
+              ) : (
+                <Mic className="h-4 w-4" />
+              )}
+            </Button>
+          )}
         </form>
       </div>
     </div>
