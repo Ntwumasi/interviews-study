@@ -11,7 +11,7 @@ import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { MessageSquare, Video, X, Minimize2, Maximize2 } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -43,6 +43,8 @@ export function InterviewRoom({
   const [timeUp, setTimeUp] = useState(false)
   const [isWorkspaceExpanded, setIsWorkspaceExpanded] = useState(true)
   const [isAISpeaking, setIsAISpeaking] = useState(false)
+  const [isChatOpen, setIsChatOpen] = useState(true)
+  const [isVideoMinimized, setIsVideoMinimized] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -148,24 +150,46 @@ export function InterviewRoom({
 
   return (
     <div className="h-screen flex flex-col bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
-      {/* Modern Header - Zoom Style */}
-      <div className="border-b border-white/10 bg-black/30 backdrop-blur-sm">
-        <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
-          <div>
-            <h1 className="text-lg sm:text-xl font-semibold text-white">{scenario.title}</h1>
-            <p className="text-xs sm:text-sm text-gray-400">
-              {interviewType.replace('_', ' ').charAt(0).toUpperCase() +
-                interviewType.replace('_', ' ').slice(1)} Interview • {scenario.difficulty}
-            </p>
+      {/* Modern Header - Sleek & Spacious */}
+      <div className="border-b border-white/10 bg-black/20 backdrop-blur-xl">
+        <div className="px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div>
+              <h1 className="text-xl font-semibold text-white tracking-tight">{scenario.title}</h1>
+              <p className="text-sm text-gray-400 mt-0.5">
+                {interviewType.replace('_', ' ').charAt(0).toUpperCase() +
+                  interviewType.replace('_', ' ').slice(1)} • {scenario.difficulty}
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <ThemeToggle />
+          <div className="flex items-center gap-2 md:gap-3">
             <InterviewTimer
               durationMinutes={durationMinutes}
               startedAt={startedAt}
               onTimeUp={handleTimeUp}
             />
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsChatOpen(!isChatOpen)}
+              className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <MessageSquare className="h-4 w-4 mr-2" />
+              Chat
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsVideoMinimized(!isVideoMinimized)}
+              className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+            >
+              <Video className="h-4 w-4 mr-2" />
+              Video
+            </Button>
+            <div className="hidden md:block">
+              <ThemeToggle />
+            </div>
             <Button
               variant="destructive"
               size="sm"
@@ -178,43 +202,125 @@ export function InterviewRoom({
         </div>
       </div>
 
-      {/* Main Content - Video Call Style */}
-      <div className="flex-1 flex overflow-hidden">
-        {/* Left Side: Code Editor (Main Focus) */}
-        <div className="flex-1 min-w-0 flex flex-col border-r border-white/10 overflow-hidden bg-[#1e1e1e]">
-          {interviewType === 'coding' || interviewType === 'system_design' ? (
-            <div className="h-full w-full overflow-hidden">
+      {/* Main Content */}
+      <div className="flex-1 overflow-hidden relative">
+        {/* Mobile Layout - Stacked Design */}
+        <div className="md:hidden flex flex-col h-full">
+          {/* Workspace */}
+          <div className="flex-1 min-h-0 bg-[#1e1e1e]">
+            {interviewType === 'coding' || interviewType === 'system_design' ? (
               <InterviewWorkspace
                 interviewId={interviewId}
                 interviewType={interviewType}
               />
-            </div>
-          ) : (
-            <div className="flex-1 bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-          )}
-        </div>
-
-        {/* Right Side: Video + Chat */}
-        <div className="w-[380px] lg:w-[420px] xl:w-[450px] flex-shrink-0 flex flex-col">
-          {/* Video Panel */}
-          <div className="flex flex-col gap-2 p-2 border-b border-white/10 bg-black/20">
-            {/* AI Interviewer Video */}
-            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 shadow-xl">
-              <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-            </div>
-
-            {/* User Camera */}
-            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 shadow-lg">
-              <UserCamera />
-            </div>
+            ) : (
+              <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+            )}
           </div>
 
-          {/* Chat Interface */}
-          <div className="flex-1 min-h-0 bg-black/20 backdrop-blur-sm overflow-hidden">
-            <InterviewChat
-              transcript={transcript}
-              onSendMessage={handleSendMessage}
-            />
+          {/* Mobile Video & Chat */}
+          <div className="flex-shrink-0 h-2/5 flex flex-col border-t border-white/10 bg-black/30 backdrop-blur-xl">
+            {/* Video Tabs */}
+            <div className="flex gap-2 p-2 border-b border-white/10">
+              <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
+                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+              </div>
+              <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
+                <UserCamera />
+              </div>
+            </div>
+            {/* Chat */}
+            <div className="flex-1 min-h-0">
+              <InterviewChat
+                transcript={transcript}
+                onSendMessage={handleSendMessage}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop Layout - Full Width with Floating Panels */}
+        <div className="hidden md:block h-full">
+          {/* Full Width Workspace */}
+          <div className="h-full w-full overflow-hidden bg-[#1e1e1e]">
+            {interviewType === 'coding' || interviewType === 'system_design' ? (
+              <InterviewWorkspace
+                interviewId={interviewId}
+                interviewType={interviewType}
+              />
+            ) : (
+              <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+            )}
+          </div>
+
+          {/* Floating Video Panel - Top Right */}
+          {!isVideoMinimized && (
+            <div className="absolute top-4 right-4 z-20 flex flex-col gap-3 transition-all duration-300 ease-in-out">
+              {/* AI Interviewer Video */}
+              <div className="relative w-72 aspect-video rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-black/40 backdrop-blur-sm group">
+                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <button
+                    onClick={() => setIsVideoMinimized(true)}
+                    className="p-1.5 bg-black/60 hover:bg-black/80 rounded-lg text-white/80 hover:text-white transition-all"
+                  >
+                    <Minimize2 className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                  <p className="text-xs font-medium text-white">AI Interviewer</p>
+                </div>
+              </div>
+
+              {/* User Camera */}
+              <div className="relative w-72 aspect-video rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-black/40 backdrop-blur-sm group">
+                <UserCamera />
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                  <p className="text-xs font-medium text-white">You</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Minimized Video Button */}
+          {isVideoMinimized && (
+            <button
+              onClick={() => setIsVideoMinimized(false)}
+              className="absolute top-4 right-4 z-20 p-3 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-xl border border-white/20 text-white shadow-2xl transition-all hover:scale-105 active:scale-95"
+            >
+              <Maximize2 className="h-5 w-5" />
+            </button>
+          )}
+
+          {/* Slide-out Chat Panel */}
+          <div
+            className={`absolute top-0 right-0 h-full w-96 bg-black/30 backdrop-blur-xl border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out z-30 ${
+              isChatOpen ? 'translate-x-0' : 'translate-x-full'
+            }`}
+          >
+            <div className="h-full flex flex-col">
+              {/* Chat Header */}
+              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/20">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4 text-blue-400" />
+                  <h3 className="text-sm font-semibold text-white">Interview Chat</h3>
+                </div>
+                <button
+                  onClick={() => setIsChatOpen(false)}
+                  className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Chat Content */}
+              <div className="flex-1 min-h-0 overflow-hidden">
+                <InterviewChat
+                  transcript={transcript}
+                  onSendMessage={handleSendMessage}
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
