@@ -103,73 +103,15 @@ export default async function DashboardPage() {
   return (
     <div className="min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
-        {/* Mobile: Quick Start Section */}
-        <div className="block md:hidden mb-8">
-          {/* Header */}
-          <div className="mb-6 text-center">
+        {/* Mobile: Header Only */}
+        <div className="block md:hidden mb-6">
+          <div className="text-center">
             <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 leading-tight">
-              Interview Practice
+              Your Interviews
             </h1>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Start a new interview or review your past sessions
+              Review your past interview performances
             </p>
-          </div>
-
-          {/* Quick Start Cards */}
-          <div className="space-y-3 mb-8">
-            <Link
-              href="/interview/start?type=coding&difficulty=medium"
-              className="block w-full"
-            >
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 rounded-2xl p-5 text-white shadow-lg active:scale-[0.98] transition-transform">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <Code2 className="w-7 h-7" />
-                    <div>
-                      <h3 className="font-bold text-lg">Coding Interview</h3>
-                      <p className="text-xs text-blue-100">Medium • 60 min</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl">→</span>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/interview/start?type=system_design&difficulty=medium"
-              className="block w-full"
-            >
-              <div className="bg-gradient-to-r from-purple-500 to-purple-600 dark:from-purple-600 dark:to-purple-700 rounded-2xl p-5 text-white shadow-lg active:scale-[0.98] transition-transform">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <Network className="w-7 h-7" />
-                    <div>
-                      <h3 className="font-bold text-lg">System Design</h3>
-                      <p className="text-xs text-purple-100">Medium • 45 min</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl">→</span>
-                </div>
-              </div>
-            </Link>
-
-            <Link
-              href="/interview/start?type=behavioral&difficulty=medium"
-              className="block w-full"
-            >
-              <div className="bg-gradient-to-r from-green-500 to-green-600 dark:from-green-600 dark:to-green-700 rounded-2xl p-5 text-white shadow-lg active:scale-[0.98] transition-transform">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-3">
-                    <MessageSquare className="w-7 h-7" />
-                    <div>
-                      <h3 className="font-bold text-lg">Behavioral</h3>
-                      <p className="text-xs text-green-100">Medium • 30 min</p>
-                    </div>
-                  </div>
-                  <span className="text-2xl">→</span>
-                </div>
-              </div>
-            </Link>
           </div>
         </div>
 
@@ -254,14 +196,22 @@ export default async function DashboardPage() {
             <PastInterviewsSection interviews={pastInterviews} />
           </div>
         ) : (
-          <div className="block md:hidden text-center py-8">
-            <div className="bg-gray-100 dark:bg-white/5 rounded-2xl p-6 border-2 border-dashed border-gray-300 dark:border-white/10">
-              <p className="text-gray-600 dark:text-gray-400 text-sm mb-2">
-                No past interviews yet
-              </p>
-              <p className="text-gray-500 dark:text-gray-500 text-xs">
-                Complete your first interview to see results here
-              </p>
+          <div className="block md:hidden text-center py-12">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl p-8 border-2 border-blue-200 dark:border-blue-500/30">
+              <div className="mb-4">
+                <div className="w-16 h-16 mx-auto mb-4 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center">
+                  <span className="text-4xl">📝</span>
+                </div>
+                <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                  No interviews yet
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mb-4 max-w-xs mx-auto">
+                  Start your first practice interview to see results here
+                </p>
+              </div>
+              <div className="text-xs text-gray-500 dark:text-gray-500">
+                💡 Use the menu (☰) to start a new interview
+              </div>
             </div>
           </div>
         )}

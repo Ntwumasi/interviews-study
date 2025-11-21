@@ -16,8 +16,29 @@ export default function DashboardLayout({
   const pathname = usePathname()
 
   const navItems = [
-    { href: '/dashboard', label: 'Practice', icon: Home },
+    { href: '/dashboard', label: 'Dashboard', icon: Home },
     { href: '/dashboard/history', label: 'History', icon: BarChart3 },
+  ]
+
+  const interviewTypes = [
+    {
+      href: '/interview/start?type=coding&difficulty=medium',
+      label: 'Coding Interview',
+      icon: '💻',
+      color: 'text-blue-600 dark:text-blue-400'
+    },
+    {
+      href: '/interview/start?type=system_design&difficulty=medium',
+      label: 'System Design',
+      icon: '🏗️',
+      color: 'text-purple-600 dark:text-purple-400'
+    },
+    {
+      href: '/interview/start?type=behavioral&difficulty=medium',
+      label: 'Behavioral',
+      icon: '💬',
+      color: 'text-green-600 dark:text-green-400'
+    },
   ]
 
   const isActive = (href: string) => pathname === href
@@ -97,6 +118,7 @@ export default function DashboardLayout({
           {mobileMenuOpen && (
             <div className="md:hidden py-4 border-t border-gray-200 dark:border-white/10">
               <nav className="flex flex-col gap-2">
+                {/* Main Navigation */}
                 {navItems.map((item) => {
                   const Icon = item.icon
                   return (
@@ -115,6 +137,29 @@ export default function DashboardLayout({
                     </Link>
                   )
                 })}
+
+                {/* Divider */}
+                <div className="my-2 border-t border-gray-200 dark:border-white/10" />
+
+                {/* Interview Type Section */}
+                <div className="px-4 py-2">
+                  <p className="text-xs font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wider mb-2">
+                    Start New Interview
+                  </p>
+                </div>
+
+                {/* Interview Types */}
+                {interviewTypes.map((interview) => (
+                  <Link
+                    key={interview.href}
+                    href={interview.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="flex items-center gap-3 px-4 py-3 rounded-lg transition-all text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-white/5"
+                  >
+                    <span className="text-xl">{interview.icon}</span>
+                    <span className={`font-medium ${interview.color}`}>{interview.label}</span>
+                  </Link>
+                ))}
               </nav>
             </div>
           )}
