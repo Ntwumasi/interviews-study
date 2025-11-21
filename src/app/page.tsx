@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Brain, MessageSquare, Target, Twitter, Github, Code2, Network, CheckCircle2, Clock, Camera, Timer, Bot, BarChart3 } from 'lucide-react'
 import { NewsletterSignup } from '@/components/landing/newsletter-signup'
-import { TypingText } from '@/components/landing/typing-text'
+import { CyclingTypingText } from '@/components/landing/cycling-typing-text'
 
 export default function LandingPage() {
   return (
@@ -29,12 +29,19 @@ export default function LandingPage() {
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
             Ace Your Next{' '}
-            <TypingText
-              text="Tech Interview"
-              className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400"
-              delay={300}
-              speed={80}
-            />
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
+              <CyclingTypingText
+                words={['Coding', 'System Design', 'Behavioral']}
+                typingSpeed={100}
+                deletingSpeed={50}
+                pauseAfterTyping={2000}
+                pauseAfterDeleting={500}
+              />
+            </span>
+            {' '}
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
+              Interview
+            </span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-4">
             Practice coding, system design, and behavioral interviews with AI.
