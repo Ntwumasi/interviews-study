@@ -8,14 +8,27 @@ import { BehavioralWorkspace } from './workspaces/behavioral-workspace'
 interface InterviewWorkspaceProps {
   interviewId: string
   interviewType: InterviewType
+  onOutputChange?: (output: string) => void
+  onRunningChange?: (isRunning: boolean) => void
 }
 
-export function InterviewWorkspace({ interviewId, interviewType }: InterviewWorkspaceProps) {
+export function InterviewWorkspace({
+  interviewId,
+  interviewType,
+  onOutputChange,
+  onRunningChange
+}: InterviewWorkspaceProps) {
   switch (interviewType) {
     case 'system_design':
       return <DiagramWorkspace interviewId={interviewId} />
     case 'coding':
-      return <CodeWorkspace interviewId={interviewId} />
+      return (
+        <CodeWorkspace
+          interviewId={interviewId}
+          onOutputChange={onOutputChange}
+          onRunningChange={onRunningChange}
+        />
+      )
     case 'behavioral':
       return <BehavioralWorkspace interviewId={interviewId} />
     default:

@@ -7,11 +7,12 @@ import { DURATION_BY_TYPE } from '@/types'
 import { InterviewTimer } from './interview-timer'
 import { InterviewChat } from './interview-chat'
 import { InterviewWorkspace } from './interview-workspace'
+import { InterviewBottomPanel } from './interview-bottom-panel'
 import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { MessageSquare, Video, X, Minimize2, Maximize2 } from 'lucide-react'
+import { MessageSquare } from 'lucide-react'
 import {
   Dialog,
   DialogContent,
@@ -43,8 +44,8 @@ export function InterviewRoom({
   const [timeUp, setTimeUp] = useState(false)
   const [isWorkspaceExpanded, setIsWorkspaceExpanded] = useState(true)
   const [isAISpeaking, setIsAISpeaking] = useState(false)
-  const [isChatOpen, setIsChatOpen] = useState(true)
-  const [isVideoMinimized, setIsVideoMinimized] = useState(false)
+  const [codeOutput, setCodeOutput] = useState('')
+  const [isRunningCode, setIsRunningCode] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -163,33 +164,13 @@ export function InterviewRoom({
             </div>
           </div>
 
-          <div className="flex items-center gap-2 md:gap-3">
+          <div className="flex items-center gap-3">
             <InterviewTimer
               durationMinutes={durationMinutes}
               startedAt={startedAt}
               onTimeUp={handleTimeUp}
             />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsChatOpen(!isChatOpen)}
-              className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Chat
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsVideoMinimized(!isVideoMinimized)}
-              className="hidden md:flex text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <Video className="h-4 w-4 mr-2" />
-              Video
-            </Button>
-            <div className="hidden md:block">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
             <Button
               variant="destructive"
               size="sm"
@@ -203,7 +184,7 @@ export function InterviewRoom({
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-hidden relative">
+      <div className="flex-1 overflow-hidden flex flex-col">
         {/* Mobile Layout - Stacked Design */}
         <div className="md:hidden flex flex-col h-full">
           {/* Workspace */}
@@ -239,88 +220,53 @@ export function InterviewRoom({
           </div>
         </div>
 
-        {/* Desktop Layout - Full Width with Floating Panels */}
-        <div className="hidden md:block h-full">
-          {/* Full Width Workspace */}
-          <div className="h-full w-full overflow-hidden bg-[#1e1e1e]">
-            {interviewType === 'coding' || interviewType === 'system_design' ? (
-              <InterviewWorkspace
-                interviewId={interviewId}
-                interviewType={interviewType}
-              />
-            ) : (
-              <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-            )}
-          </div>
+        {/* Desktop Layout - Grid with Editor, Cameras, and Bottom Panel */}
+        <div className="hidden md:flex md:flex-col h-full">
+          {/* Top Section: Editor (col-10) + Cameras (col-2) */}
+          <div className="flex-1 flex overflow-hidden">
+            {/* Editor Area - 83% width (col-10 equivalent) */}
+            <div className="flex-1 min-w-0 bg-[#1e1e1e] border-r border-white/10">
+              {interviewType === 'coding' || interviewType === 'system_design' ? (
+                <InterviewWorkspace
+                  interviewId={interviewId}
+                  interviewType={interviewType}
+                  onOutputChange={setCodeOutput}
+                  onRunningChange={setIsRunningCode}
+                />
+              ) : (
+                <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+              )}
+            </div>
 
-          {/* Floating Video Panel - Top Right */}
-          {!isVideoMinimized && (
-            <div className="absolute top-4 right-4 z-20 flex flex-col gap-3 transition-all duration-300 ease-in-out">
+            {/* Cameras Area - 17% width (col-2 equivalent) */}
+            <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
               {/* AI Interviewer Video */}
-              <div className="relative w-72 aspect-video rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-black/40 backdrop-blur-sm group">
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                  <button
-                    onClick={() => setIsVideoMinimized(true)}
-                    className="p-1.5 bg-black/60 hover:bg-black/80 rounded-lg text-white/80 hover:text-white transition-all"
-                  >
-                    <Minimize2 className="h-3.5 w-3.5" />
-                  </button>
-                </div>
                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
                   <p className="text-xs font-medium text-white">AI Interviewer</p>
                 </div>
               </div>
 
               {/* User Camera */}
-              <div className="relative w-72 aspect-video rounded-xl overflow-hidden border border-white/20 shadow-2xl bg-black/40 backdrop-blur-sm group">
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
                 <UserCamera />
                 <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
                   <p className="text-xs font-medium text-white">You</p>
                 </div>
               </div>
             </div>
-          )}
+          </div>
 
-          {/* Minimized Video Button */}
-          {isVideoMinimized && (
-            <button
-              onClick={() => setIsVideoMinimized(false)}
-              className="absolute top-4 right-4 z-20 p-3 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-xl border border-white/20 text-white shadow-2xl transition-all hover:scale-105 active:scale-95"
-            >
-              <Maximize2 className="h-5 w-5" />
-            </button>
-          )}
-
-          {/* Slide-out Chat Panel */}
-          <div
-            className={`absolute top-0 right-0 h-full w-96 bg-black/30 backdrop-blur-xl border-l border-white/10 shadow-2xl transform transition-transform duration-300 ease-in-out z-30 ${
-              isChatOpen ? 'translate-x-0' : 'translate-x-full'
-            }`}
-          >
-            <div className="h-full flex flex-col">
-              {/* Chat Header */}
-              <div className="flex items-center justify-between px-4 py-3 border-b border-white/10 bg-black/20">
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4 text-blue-400" />
-                  <h3 className="text-sm font-semibold text-white">Interview Chat</h3>
-                </div>
-                <button
-                  onClick={() => setIsChatOpen(false)}
-                  className="p-1.5 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-
-              {/* Chat Content */}
-              <div className="flex-1 min-h-0 overflow-hidden">
-                <InterviewChat
-                  transcript={transcript}
-                  onSendMessage={handleSendMessage}
-                />
-              </div>
-            </div>
+          {/* Bottom Section: Chat + Output - Full Width */}
+          <div className="h-80 flex-shrink-0 border-t border-white/10">
+            <InterviewBottomPanel
+              transcript={transcript}
+              onSendMessage={handleSendMessage}
+              codeOutput={codeOutput}
+              isRunning={isRunningCode}
+              showOutput={interviewType === 'coding'}
+            />
           </div>
         </div>
       </div>

@@ -10,14 +10,14 @@ const Editor = dynamic(() => import('@monaco-editor/react'), { ssr: false })
 
 interface CodeWorkspaceProps {
   interviewId: string
+  onOutputChange?: (output: string) => void
+  onRunningChange?: (isRunning: boolean) => void
 }
 
-export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
+export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: CodeWorkspaceProps) {
   const [code, setCode] = useState('// Write your code here\n\n')
   const [language, setLanguage] = useState('javascript')
   const [isSaving, setIsSaving] = useState(false)
-  const [output, setOutput] = useState('')
-  const [isRunning, setIsRunning] = useState(false)
 
   // Load saved code on mount
   useEffect(() => {
@@ -65,8 +65,8 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
   }, [code, language, interviewId])
 
   const handleRun = async () => {
-    setIsRunning(true)
-    setOutput('Running code...')
+    onRunningChange?.(true)
+    onOutputChange?.('Running code...')
 
     try {
       const response = await fetch('/api/execute-code', {
@@ -78,15 +78,15 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
       const data = await response.json()
 
       if (response.ok) {
-        setOutput(data.output || 'No output')
+        onOutputChange?.(data.output || 'No output')
       } else {
-        setOutput(`Error: ${data.error || 'Failed to execute code'}`)
+        onOutputChange?.(`Error: ${data.error || 'Failed to execute code'}`)
       }
     } catch (error) {
       console.error('[Code] Failed to execute:', error)
-      setOutput('Error: Failed to execute code. Please try again.')
+      onOutputChange?.('Error: Failed to execute code. Please try again.')
     } finally {
-      setIsRunning(false)
+      onRunningChange?.(false)
     }
   }
 
@@ -121,53 +121,35 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
             <Button
               size="sm"
               onClick={handleRun}
-              disabled={isRunning}
-              className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed h-7 text-xs px-3"
+              className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs px-3"
             >
               <Play className="h-3 w-3 mr-1" />
-              {isRunning ? 'Running...' : 'Run'}
+              Run
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Editor and Output Container */}
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Monaco Code Editor */}
-        <div className="flex-1 min-h-0" style={{ height: '70%' }}>
-          <Editor
-            height="100%"
-            width="100%"
-            language={language}
-            value={code}
-            onChange={handleCodeChange}
-            theme="vs-dark"
-            options={{
-              minimap: { enabled: false },
-              fontSize: 13,
-              lineNumbers: 'on',
-              scrollBeyondLastLine: false,
-              automaticLayout: true,
-              tabSize: 2,
-              wordWrap: 'on',
-              padding: { top: 8, bottom: 8 },
-            }}
-          />
-        </div>
-
-        {/* Output Panel */}
-        <div className="flex-shrink-0 border-t-2 border-white/20 bg-[#1e1e1e] overflow-hidden" style={{ height: '30%' }}>
-          <div className="h-full flex flex-col">
-            <div className="flex-shrink-0 px-3 py-2 border-b border-white/10 bg-[#252526]">
-              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Output</div>
-            </div>
-            <div className="flex-1 overflow-y-auto p-3">
-              <pre className="font-mono text-xs text-gray-300 whitespace-pre-wrap leading-relaxed">
-                {output || 'Run your code to see output here...'}
-              </pre>
-            </div>
-          </div>
-        </div>
+      {/* Monaco Code Editor - Full Height */}
+      <div className="flex-1 min-h-0">
+        <Editor
+          height="100%"
+          width="100%"
+          language={language}
+          value={code}
+          onChange={handleCodeChange}
+          theme="vs-dark"
+          options={{
+            minimap: { enabled: false },
+            fontSize: 13,
+            lineNumbers: 'on',
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+            tabSize: 2,
+            wordWrap: 'on',
+            padding: { top: 8, bottom: 8 },
+          }}
+        />
       </div>
     </div>
   )
