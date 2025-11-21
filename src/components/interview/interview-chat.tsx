@@ -293,29 +293,27 @@ export function InterviewChat({ transcript, onSendMessage }: InterviewChatProps)
       </div>
 
       {/* Input */}
-      <div className="border-t border-white/10 p-4 bg-[#0A0A0A]/50 backdrop-blur-sm">
-        <form onSubmit={handleSubmit} className="flex gap-2">
+      <div className="border-t border-white/10 p-3 bg-black/30 backdrop-blur-sm">
+        <form onSubmit={handleSubmit} className="relative">
           <textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder={speechSupported ? "Type or click microphone to speak... (Shift+Enter for new line)" : "Type your response... (Shift+Enter for new line)"}
-            className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-h-[60px] max-h-[200px]"
+            placeholder="Ask anything"
+            className="w-full bg-white/5 border border-white/10 rounded-xl pl-4 pr-12 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-white/20 resize-none min-h-[48px] max-h-[200px]"
             disabled={isLoading}
             rows={1}
           />
           <Button
             type="submit"
             disabled={!input.trim() || isLoading}
-            className="self-end h-[60px] px-6"
+            className="absolute right-2 bottom-2 h-8 w-8 p-0 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30"
+            variant="ghost"
           >
-            <Send className="h-5 w-5" />
+            <Send className="h-4 w-4" />
           </Button>
         </form>
-        <p className="text-xs text-gray-500 mt-2">
-          Press Enter to send • Shift+Enter for new line • <span className="text-blue-400">💡 AI can see your code</span>
-        </p>
       </div>
     </div>
   )

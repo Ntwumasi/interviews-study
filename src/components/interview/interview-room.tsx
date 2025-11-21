@@ -44,8 +44,21 @@ export function InterviewRoom({
   const [isAISpeaking, setIsAISpeaking] = useState(false)
   const [codeOutput, setCodeOutput] = useState('')
   const [isRunningCode, setIsRunningCode] = useState(false)
+  const [isMobile, setIsMobile] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
+
+  // Detect screen size to conditionally render (not just hide) components
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
 
   const handleSendMessage = async (message: string) => {
     // Add user message to transcript
@@ -183,108 +196,110 @@ export function InterviewRoom({
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden flex flex-col">
-        {/* Mobile Layout - Stacked Design */}
-        <div className="md:hidden flex flex-col h-full">
-          {/* Workspace */}
-          <div className="flex-1 min-h-0 bg-[#1e1e1e]">
-            {interviewType === 'coding' || interviewType === 'system_design' ? (
-              <InterviewWorkspace
-                interviewId={interviewId}
-                interviewType={interviewType}
-              />
-            ) : (
-              <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-            )}
-          </div>
-
-          {/* Mobile Video & Chat */}
-          <div className="flex-shrink-0 h-2/5 flex flex-col border-t border-white/10 bg-black/30 backdrop-blur-xl">
-            {/* Video Tabs */}
-            <div className="flex gap-2 p-2 border-b border-white/10">
-              <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
-                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-              </div>
-              <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
-                <UserCamera />
-              </div>
-            </div>
-            {/* Chat */}
-            <div className="flex-1 min-h-0">
-              <InterviewChat
-                transcript={transcript}
-                onSendMessage={handleSendMessage}
-              />
-            </div>
-          </div>
-        </div>
-
-        {/* Desktop Layout - 3 Column: Editor (col-8) + Chat (col-2) + Video (col-2) */}
-        <div className="hidden md:flex h-full">
-          {/* Editor Area - 66.67% width (col-8 equivalent) */}
-          <div className="w-2/3 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
-            {/* Editor */}
-            <div className="flex-1 overflow-hidden">
+        {isMobile ? (
+          /* Mobile Layout - Stacked Design */
+          <div className="flex flex-col h-full">
+            {/* Workspace */}
+            <div className="flex-1 min-h-0 bg-[#1e1e1e]">
               {interviewType === 'coding' || interviewType === 'system_design' ? (
                 <InterviewWorkspace
                   interviewId={interviewId}
                   interviewType={interviewType}
-                  onOutputChange={setCodeOutput}
-                  onRunningChange={setIsRunningCode}
                 />
               ) : (
                 <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
               )}
             </div>
 
-            {/* Output Panel - Only for coding */}
-            {interviewType === 'coding' && (
-              <div className="h-60 flex-shrink-0 border-t border-white/10 bg-[#1e1e1e]">
-                <div className="h-full flex flex-col">
-                  <div className="flex-shrink-0 px-4 py-2 border-b border-white/10 bg-[#252526] flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Output</div>
-                      {isRunningCode && (
-                        <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex-1 overflow-y-auto p-4">
-                    <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
-                      {codeOutput || 'Run your code to see output here...'}
-                    </pre>
-                  </div>
+            {/* Mobile Video & Chat */}
+            <div className="flex-shrink-0 h-2/5 flex flex-col border-t border-white/10 bg-black/30 backdrop-blur-xl">
+              {/* Video Tabs */}
+              <div className="flex gap-2 p-2 border-b border-white/10">
+                <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
+                  <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+                </div>
+                <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
+                  <UserCamera />
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* Chat Area - 16.67% width (col-2 equivalent) */}
-          <div className="w-1/6 flex-shrink-0 border-r border-white/10 bg-black/20">
-            <InterviewChat
-              transcript={transcript}
-              onSendMessage={handleSendMessage}
-            />
-          </div>
-
-          {/* Video Area - 16.67% width (col-2 equivalent) */}
-          <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
-            {/* AI Interviewer Video */}
-            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-              <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                <p className="text-xs font-medium text-white">AI Interviewer</p>
-              </div>
-            </div>
-
-            {/* User Camera */}
-            <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-              <UserCamera />
-              <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
-                <p className="text-xs font-medium text-white">You</p>
+              {/* Chat */}
+              <div className="flex-1 min-h-0">
+                <InterviewChat
+                  transcript={transcript}
+                  onSendMessage={handleSendMessage}
+                />
               </div>
             </div>
           </div>
-        </div>
+        ) : (
+          /* Desktop Layout - 3 Column: Editor (col-8) + Chat (col-2) + Video (col-2) */
+          <div className="flex h-full">
+            {/* Editor Area - 66.67% width (col-8 equivalent) */}
+            <div className="w-2/3 min-w-0 bg-[#1e1e1e] border-r border-white/10 flex flex-col">
+              {/* Editor */}
+              <div className="flex-1 overflow-hidden">
+                {interviewType === 'coding' || interviewType === 'system_design' ? (
+                  <InterviewWorkspace
+                    interviewId={interviewId}
+                    interviewType={interviewType}
+                    onOutputChange={setCodeOutput}
+                    onRunningChange={setIsRunningCode}
+                  />
+                ) : (
+                  <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
+                )}
+              </div>
+
+              {/* Output Panel - Only for coding */}
+              {interviewType === 'coding' && (
+                <div className="h-60 flex-shrink-0 border-t border-white/10 bg-[#1e1e1e]">
+                  <div className="h-full flex flex-col">
+                    <div className="flex-shrink-0 px-4 py-2 border-b border-white/10 bg-[#252526] flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-semibold text-gray-300 uppercase tracking-wide">Output</div>
+                        {isRunningCode && (
+                          <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-4">
+                      <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap leading-relaxed">
+                        {codeOutput || 'Run your code to see output here...'}
+                      </pre>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Chat Area - 16.67% width (col-2 equivalent) */}
+            <div className="w-1/6 flex-shrink-0 border-r border-white/10 bg-black/20">
+              <InterviewChat
+                transcript={transcript}
+                onSendMessage={handleSendMessage}
+              />
+            </div>
+
+            {/* Video Area - 16.67% width (col-2 equivalent) */}
+            <div className="w-1/6 flex-shrink-0 flex flex-col gap-3 p-3 bg-black/20">
+              {/* AI Interviewer Video */}
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+                <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                  <p className="text-xs font-medium text-white">AI Interviewer</p>
+                </div>
+              </div>
+
+              {/* User Camera */}
+              <div className="relative aspect-video rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
+                <UserCamera />
+                <div className="absolute bottom-2 left-2 px-2 py-1 bg-black/60 backdrop-blur-sm rounded-md">
+                  <p className="text-xs font-medium text-white">You</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* End Interview Confirmation Dialog */}
