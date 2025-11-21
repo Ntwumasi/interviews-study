@@ -181,9 +181,9 @@ export function InterviewRoom({
       {/* Main Content - Video Call Style */}
       <div className="flex-1 flex overflow-hidden">
         {/* Left Side: Code Editor (Main Focus) */}
-        <div className="flex-1 flex flex-col border-r border-white/10 overflow-hidden">
+        <div className="flex-1 min-w-0 flex flex-col border-r border-white/10 overflow-hidden bg-[#1e1e1e]">
           {interviewType === 'coding' || interviewType === 'system_design' ? (
-            <div className="h-full overflow-hidden">
+            <div className="h-full w-full overflow-hidden">
               <InterviewWorkspace
                 interviewId={interviewId}
                 interviewType={interviewType}
@@ -195,9 +195,9 @@ export function InterviewRoom({
         </div>
 
         {/* Right Side: Video + Chat */}
-        <div className="w-[30%] min-w-[400px] flex flex-col">
+        <div className="w-[380px] lg:w-[420px] xl:w-[450px] flex-shrink-0 flex flex-col">
           {/* Video Panel */}
-          <div className="flex flex-col gap-3 p-3 border-b border-white/10 bg-black/20">
+          <div className="flex flex-col gap-2 p-2 border-b border-white/10 bg-black/20">
             {/* AI Interviewer Video */}
             <div className="relative aspect-video rounded-lg overflow-hidden border border-white/10 shadow-xl">
               <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
@@ -210,7 +210,7 @@ export function InterviewRoom({
           </div>
 
           {/* Chat Interface */}
-          <div className="flex-1 bg-black/20 backdrop-blur-sm">
+          <div className="flex-1 min-h-0 bg-black/20 backdrop-blur-sm overflow-hidden">
             <InterviewChat
               transcript={transcript}
               onSendMessage={handleSendMessage}

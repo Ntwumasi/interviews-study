@@ -95,21 +95,22 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
   }
 
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0A] overflow-hidden">
-      <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-white/5">
+    <div className="h-full w-full flex flex-col bg-[#1e1e1e]">
+      {/* Header - Fixed Position */}
+      <div className="flex-shrink-0 border-b border-white/10 px-3 py-2.5 bg-[#252526] shadow-lg z-10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Code2 className="h-4 w-4 text-green-400" />
             <h3 className="text-sm font-semibold text-white">Code Editor</h3>
             {isSaving && (
-              <span className="text-xs text-gray-400">Saving...</span>
+              <span className="text-xs text-gray-400 animate-pulse">Saving...</span>
             )}
           </div>
           <div className="flex items-center gap-2">
             <select
               value={language}
               onChange={(e) => setLanguage(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded px-2 py-1 text-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+              className="bg-[#3c3c3c] border border-white/10 rounded px-2 py-1 text-xs text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value="javascript">JavaScript</option>
               <option value="python">Python</option>
@@ -121,42 +122,51 @@ export function CodeWorkspace({ interviewId }: CodeWorkspaceProps) {
               size="sm"
               onClick={handleRun}
               disabled={isRunning}
-              className="bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-green-600 hover:bg-green-700 text-white disabled:opacity-50 disabled:cursor-not-allowed h-7 text-xs px-3"
             >
-              <Play className="h-4 w-4 mr-1" />
+              <Play className="h-3 w-3 mr-1" />
               {isRunning ? 'Running...' : 'Run'}
             </Button>
           </div>
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden">
+      {/* Editor and Output Container */}
+      <div className="flex-1 flex flex-col min-h-0">
         {/* Monaco Code Editor */}
-        <div className="flex-1 min-h-0 overflow-hidden">
+        <div className="flex-1 min-h-0" style={{ height: '70%' }}>
           <Editor
             height="100%"
+            width="100%"
             language={language}
             value={code}
             onChange={handleCodeChange}
             theme="vs-dark"
             options={{
               minimap: { enabled: false },
-              fontSize: 14,
+              fontSize: 13,
               lineNumbers: 'on',
               scrollBeyondLastLine: false,
               automaticLayout: true,
               tabSize: 2,
               wordWrap: 'on',
+              padding: { top: 8, bottom: 8 },
             }}
           />
         </div>
 
-        {/* Output Panel - Larger and expandable */}
-        <div className="flex-shrink-0 border-t border-white/10 bg-white/5 p-4 h-64 overflow-y-auto">
-          <div className="text-xs font-semibold text-gray-400 mb-2">OUTPUT</div>
-          <pre className="font-mono text-sm text-gray-300 whitespace-pre-wrap">
-            {output || 'Run your code to see output here...'}
-          </pre>
+        {/* Output Panel */}
+        <div className="flex-shrink-0 border-t-2 border-white/20 bg-[#1e1e1e] overflow-hidden" style={{ height: '30%' }}>
+          <div className="h-full flex flex-col">
+            <div className="flex-shrink-0 px-3 py-2 border-b border-white/10 bg-[#252526]">
+              <div className="text-xs font-semibold text-gray-400 uppercase tracking-wide">Output</div>
+            </div>
+            <div className="flex-1 overflow-y-auto p-3">
+              <pre className="font-mono text-xs text-gray-300 whitespace-pre-wrap leading-relaxed">
+                {output || 'Run your code to see output here...'}
+              </pre>
+            </div>
+          </div>
         </div>
       </div>
     </div>
