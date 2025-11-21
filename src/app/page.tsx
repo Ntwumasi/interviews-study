@@ -28,20 +28,17 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 sm:px-6 py-12 sm:py-20 md:py-32">
         <div className="max-w-5xl mx-auto text-center">
           <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold text-white mb-4 sm:mb-6 leading-tight tracking-tight">
-            Ace Your Next{' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
+            <span className="inline-block">Ace Your Next </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400 inline-block">
               <CyclingTypingText
                 words={['Coding', 'System Design', 'Behavioral']}
-                typingSpeed={100}
-                deletingSpeed={50}
-                pauseAfterTyping={2000}
-                pauseAfterDeleting={500}
+                typingSpeed={150}
+                deletingSpeed={75}
+                pauseAfterTyping={3000}
+                pauseAfterDeleting={800}
               />
             </span>
-            {' '}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400">
-              Interview
-            </span>
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-blue-400 inline-block"> Interview</span>
           </h1>
           <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 mb-8 sm:mb-10 max-w-3xl mx-auto leading-relaxed px-4">
             Practice coding, system design, and behavioral interviews with AI.
