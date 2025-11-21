@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // 3. Fetch interview and scenario details
+    // 3. Fetch interview and scenario details with latest code
     if (!supabaseAdmin) {
       return NextResponse.json(
         { error: 'Database configuration error' },
@@ -68,6 +68,17 @@ export async function POST(request: NextRequest) {
         { error: 'Unauthorized access to this interview' },
         { status: 403 }
       )
+    }
+
+    // Log code visibility for debugging
+    if (interview.interview_type === 'coding') {
+      const codeLength = interview.code_submission?.code?.length || 0
+      console.log(`[AI Interviewer] Code visibility: ${codeLength} characters`)
+      if (codeLength > 0) {
+        console.log('[AI Interviewer] ✓ AI can see the candidate\'s code')
+      } else {
+        console.log('[AI Interviewer] ⚠ No code written yet')
+      }
     }
 
     // 4. Build system prompt based on interview type
@@ -209,12 +220,36 @@ ${scenario.prompt}
 `
 
     case 'coding':
-      const codeContext = codeSubmission?.code
-        ? `\n**Current Code in Editor:**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n\n- You can see their code above. Reference it when discussing their approach.\n- Ask specific questions about their implementation\n- Point out potential issues or edge cases in their code\n- If they haven't started coding yet, encourage them to begin\n`
-        : '\n**Note:** The candidate hasn\'t written any code yet. Encourage them to start coding their solution.\n'
+      const hasCode = codeSubmission?.code && codeSubmission.code.trim().length > 0
+      const codeContext = hasCode
+        ? `\n**IMPORTANT: Current Code in Editor (${codeSubmission.code.split('\n').length} lines):**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n\n**YOUR RESPONSIBILITY - ACTIVELY REVIEW THE CODE:**
+- The candidate has written code above. You MUST reference it in your responses.
+- Comment on what they're doing right and what could be improved
+- Ask specific questions about their implementation choices
+- Point out potential bugs, edge cases, or optimizations
+- Reference specific lines or sections when giving feedback
+- Example: "I see you're using a nested loop starting at line 5. What's the time complexity of this approach?"
+- If they ask a question, relate your answer to their current code
+- Help them debug by asking about specific parts of their code
+`
+        : '\n**IMPORTANT: The candidate hasn\'t written any code yet.**\n- Encourage them to start coding their solution\n- Ask them to think aloud as they code\n- Remind them they can use the code editor on the left\n- Start with: "Let\'s begin! Feel free to start coding your solution. Walk me through your approach as you write."\n'
 
       return basePrompt + codeContext + `
 **Coding Interview Guidance:**
+${hasCode ? '**ACTIVELY REVIEW THEIR CODE - This is critical!**' : '**GET THEM CODING:**'}
+${hasCode
+  ? `- Look at the code they've written and comment on it
+- Ask about specific implementation details
+- Point out potential issues or improvements
+- Reference line numbers or code sections
+- Ask "why" questions about their choices
+- Help them optimize or debug`
+  : `- Encourage them to start coding
+- Ask them to explain their approach
+- Get them to write code, not just talk`
+}
+
+**General Coding Interview Guidelines:**
 - Start by ensuring they understand the problem
 - Ask them to think aloud as they code
 - Inquire about edge cases: empty inputs, large inputs, invalid inputs
@@ -222,7 +257,6 @@ ${scenario.prompt}
 - If they finish, ask: "Can you optimize this further?"
 - Discuss testing: "How would you test this?"
 - Be okay with pseudocode initially, then ask them to implement
-- Reference their code in the editor when giving feedback
 
 **CRITICAL FOR CODING INTERVIEWS:**
 - NEVER provide working code or pseudocode implementations
@@ -230,16 +264,21 @@ ${scenario.prompt}
 - If truly stuck, give high-level hints only: "Think about what data structure would let you look up values quickly"
 - Let them struggle a bit - that's part of the learning process
 - Guide with questions, not solutions
-- Review their code and ask questions about specific parts: "I see you're using a loop here. What's the time complexity?"
+- ${hasCode ? 'ALWAYS reference their actual code when giving feedback' : 'Encourage them to start writing code'}
 
 **Example Questions to Ask:**
-- "What's your initial approach?"
-- "Can you walk me through an example?"
-- "What edge cases should we consider?"
-- "What's the time complexity of your solution?"
-- "How would you handle [specific edge case]?"
-- "Can you optimize the space complexity?"
-- "I see in your code on line X, why did you choose to do Y?"
+${hasCode
+  ? `- "I see you're using [X] in your code. Can you explain why you chose that approach?"
+- "On line [Y], what happens if [edge case]?"
+- "What's the time complexity of the code you've written?"
+- "I notice you're doing [Z]. Have you considered [alternative]?"
+- "Can you walk me through how your code handles [specific input]?"
+- "What would happen if we changed [part of their code]?"`
+  : `- "What's your initial approach?"
+- "Can you start coding your solution?"
+- "Walk me through your thought process as you write"
+- "What data structures are you considering?"`
+}
 `
 
     case 'behavioral':
