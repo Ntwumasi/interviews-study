@@ -355,47 +355,110 @@ export default function LandingPage() {
       {/* Footer */}
       <footer className="border-t border-white/10 mt-12 sm:mt-16 md:mt-20">
         <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-10 md:py-12">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
-            <div className="text-center md:text-left">
-              <div className="text-white font-bold text-lg sm:text-xl mb-1 sm:mb-2">
+          {/* Main Footer Content */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-8">
+            {/* Brand */}
+            <div className="col-span-2 md:col-span-1">
+              <div className="text-white font-bold text-lg sm:text-xl mb-3">
                 interviews.study
               </div>
-              <p className="text-gray-400 text-xs sm:text-sm">
-                Built by{' '}
+              <p className="text-gray-400 text-sm mb-4">
+                AI-powered mock interviews for software engineers.
+              </p>
+              <div className="flex gap-4">
                 <a
-                  href="https://kodedit.io"
+                  href="https://twitter.com/interviewsstudy"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-green-400 hover:text-green-300 transition-colors underline"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="Follow us on Twitter"
                 >
-                  kodedit.io
+                  <Twitter className="w-5 h-5" />
                 </a>
-              </p>
+                <a
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-400 hover:text-white transition-colors"
+                  aria-label="View our GitHub"
+                >
+                  <Github className="w-5 h-5" />
+                </a>
+              </div>
             </div>
-            <div className="flex gap-4 sm:gap-6">
+
+            {/* Product */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Product</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/sign-up" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Get Started
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/faq" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    FAQ
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Company */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Company</h4>
+              <ul className="space-y-2">
+                <li>
+                  <a
+                    href="https://kodedit.io"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-gray-400 hover:text-white text-sm transition-colors"
+                  >
+                    Kodedit LLC
+                  </a>
+                </li>
+                <li>
+                  <Link href="/contact" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Contact
+                  </Link>
+                </li>
+              </ul>
+            </div>
+
+            {/* Legal */}
+            <div>
+              <h4 className="text-white font-semibold mb-3">Legal</h4>
+              <ul className="space-y-2">
+                <li>
+                  <Link href="/terms" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Terms of Service
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
+                    Privacy Policy
+                  </Link>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          {/* Bottom Bar */}
+          <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <p className="text-gray-500 text-xs sm:text-sm">
+              &copy; {new Date().getFullYear()} Kodedit LLC. All rights reserved.
+            </p>
+            <p className="text-gray-500 text-xs sm:text-sm">
+              A product of{' '}
               <a
-                href="https://twitter.com/interviewsstudy"
+                href="https://kodedit.io"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="Follow us on Twitter"
+                className="text-green-400 hover:text-green-300 transition-colors"
               >
-                <Twitter className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="sr-only">Twitter</span>
+                Kodedit LLC
               </a>
-              <a
-                href="https://github.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-gray-400 hover:text-white transition-colors"
-                aria-label="View our GitHub"
-              >
-                <Github className="w-5 h-5 sm:w-6 sm:h-6" />
-                <span className="sr-only">GitHub</span>
-              </a>
-            </div>
-            <p className="text-gray-400 text-xs sm:text-sm text-center md:text-right">
-              © 2025 interviews.study. All rights reserved.
             </p>
           </div>
         </div>
@@ -407,27 +470,89 @@ export default function LandingPage() {
         dangerouslySetInnerHTML={{
           __html: JSON.stringify({
             '@context': 'https://schema.org',
-            '@type': 'WebApplication',
-            name: 'interviews.study',
-            applicationCategory: 'EducationalApplication',
-            description:
-              'AI-powered mock interview platform for system design interviews. Practice with realistic simulations and get detailed feedback to land senior engineering roles at top tech companies.',
-            url: 'https://interviews.study',
-            creator: {
-              '@type': 'Organization',
-              name: 'kodedit.io',
-              url: 'https://kodedit.io',
-            },
-            offers: {
-              '@type': 'Offer',
-              price: '0',
-              priceCurrency: 'USD',
-            },
-            aggregateRating: {
-              '@type': 'AggregateRating',
-              ratingValue: '5',
-              ratingCount: '1',
-            },
+            '@graph': [
+              {
+                '@type': 'Organization',
+                '@id': 'https://interviews.study/#organization',
+                name: 'Kodedit LLC',
+                url: 'https://kodedit.io',
+                logo: 'https://interviews.study/logo.png',
+                sameAs: [
+                  'https://twitter.com/interviewsstudy',
+                ],
+              },
+              {
+                '@type': 'WebSite',
+                '@id': 'https://interviews.study/#website',
+                url: 'https://interviews.study',
+                name: 'interviews.study',
+                description: 'AI-powered mock interview platform for software engineers',
+                publisher: {
+                  '@id': 'https://interviews.study/#organization',
+                },
+                potentialAction: {
+                  '@type': 'SearchAction',
+                  target: 'https://interviews.study/search?q={search_term_string}',
+                  'query-input': 'required name=search_term_string',
+                },
+              },
+              {
+                '@type': 'WebApplication',
+                '@id': 'https://interviews.study/#webapp',
+                name: 'interviews.study',
+                applicationCategory: 'EducationalApplication',
+                operatingSystem: 'Web Browser',
+                description: 'AI-powered mock interview platform for coding, system design, and behavioral interviews. Practice with realistic simulations and get detailed feedback to land senior engineering roles at top tech companies.',
+                url: 'https://interviews.study',
+                provider: {
+                  '@id': 'https://interviews.study/#organization',
+                },
+                offers: {
+                  '@type': 'Offer',
+                  price: '0',
+                  priceCurrency: 'USD',
+                  description: 'Free interviews to get started',
+                },
+                featureList: [
+                  'AI-powered mock interviews',
+                  'Coding interview practice',
+                  'System design interview practice',
+                  'Behavioral interview practice',
+                  'Real-time feedback',
+                  'STAR framework guidance',
+                ],
+              },
+              {
+                '@type': 'FAQPage',
+                '@id': 'https://interviews.study/faq',
+                mainEntity: [
+                  {
+                    '@type': 'Question',
+                    name: 'What is interviews.study?',
+                    acceptedAnswer: {
+                      '@type': 'Answer',
+                      text: 'interviews.study is an AI-powered mock interview platform designed to help software engineers prepare for technical interviews at top tech companies.',
+                    },
+                  },
+                  {
+                    '@type': 'Question',
+                    name: 'What types of interviews can I practice?',
+                    acceptedAnswer: {
+                      '@type': 'Answer',
+                      text: 'We offer three types of interviews: Coding (60 minutes), System Design (45 minutes), and Behavioral (30 minutes).',
+                    },
+                  },
+                  {
+                    '@type': 'Question',
+                    name: 'Is interviews.study free?',
+                    acceptedAnswer: {
+                      '@type': 'Answer',
+                      text: 'We offer free interviews to help you get started and experience the platform before committing to a paid plan.',
+                    },
+                  },
+                ],
+              },
+            ],
           }),
         }}
       />
