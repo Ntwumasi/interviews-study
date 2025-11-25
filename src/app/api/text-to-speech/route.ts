@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { ElevenLabsClient } from 'elevenlabs'
 
 /**
  * POST /api/text-to-speech
- * Converts text to speech using ElevenLabs
+ * Converts text to speech using ElevenLabs REST API
  */
 export async function POST(request: NextRequest) {
   try {
@@ -16,7 +15,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (!process.env.ELEVENLABS_API_KEY) {
+    const apiKey = process.env.ELEVENLABS_API_KEY
+    if (!apiKey) {
       console.warn('[TTS] ELEVENLABS_API_KEY not set, voice disabled')
       return NextResponse.json(
         { error: 'Text-to-speech service not configured' },
@@ -24,38 +24,51 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Initialize client for each request
-    const elevenlabs = new ElevenLabsClient({
-      apiKey: process.env.ELEVENLABS_API_KEY,
-    })
-
     // Use a professional, natural-sounding voice
     // Rachel (voice ID: 21m00Tcm4TlvDq8ikWAM) - Calm, professional female voice
     const voiceId = '21m00Tcm4TlvDq8ikWAM'
 
     console.log('[TTS] Generating speech for text length:', text.length)
 
-    // Generate speech using the correct API
-    // Using eleven_turbo_v2_5 which is available on the free tier
-    const audio = await elevenlabs.textToSpeech.convert(voiceId, {
-      text: text,
-      model_id: 'eleven_turbo_v2_5',
-    })
+    // Call ElevenLabs API directly for reliability
+    const response = await fetch(
+      `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
+      {
+        method: 'POST',
+        headers: {
+          'Accept': 'audio/mpeg',
+          'Content-Type': 'application/json',
+          'xi-api-key': apiKey,
+        },
+        body: JSON.stringify({
+          text: text,
+          model_id: 'eleven_turbo_v2_5',
+          voice_settings: {
+            stability: 0.5,
+            similarity_boost: 0.75,
+          },
+        }),
+      }
+    )
 
-    // Convert audio stream to buffer
-    const chunks: Buffer[] = []
-    for await (const chunk of audio) {
-      chunks.push(chunk)
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('[TTS] ElevenLabs API error:', response.status, errorText)
+      return NextResponse.json(
+        { error: `ElevenLabs API error: ${response.status}` },
+        { status: response.status }
+      )
     }
-    const buffer = Buffer.concat(chunks)
 
-    console.log('[TTS] Generated audio buffer size:', buffer.length)
+    // Get audio buffer from response
+    const audioBuffer = await response.arrayBuffer()
+    console.log('[TTS] Generated audio buffer size:', audioBuffer.byteLength)
 
     // Return audio as MP3
-    return new NextResponse(buffer, {
+    return new NextResponse(audioBuffer, {
       headers: {
         'Content-Type': 'audio/mpeg',
-        'Content-Length': buffer.length.toString(),
+        'Content-Length': audioBuffer.byteLength.toString(),
         'Cache-Control': 'no-cache',
       },
     })
