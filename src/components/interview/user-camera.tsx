@@ -10,9 +10,33 @@ export function UserCamera() {
   const [isCameraOn, setIsCameraOn] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Attach stream to video element when stream changes
+  useEffect(() => {
+    if (stream && videoRef.current) {
+      console.log('[Camera] Attaching stream to video element')
+      videoRef.current.srcObject = stream
+
+      // Force play after a small delay to ensure the video element is ready
+      const playVideo = async () => {
+        try {
+          if (videoRef.current) {
+            await videoRef.current.play()
+            console.log('[Camera] Video playing successfully')
+          }
+        } catch (err) {
+          console.error('[Camera] Error playing video:', err)
+          setError('Unable to display camera feed. Please try again.')
+        }
+      }
+
+      playVideo()
+    }
+  }, [stream])
+
   const startCamera = async () => {
     try {
       setError(null)
+      console.log('[Camera] Starting camera...')
 
       // Check if getUserMedia is available
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -29,18 +53,12 @@ export function UserCamera() {
         audio: false, // Don't request audio to avoid conflicts
       })
 
-      setStream(mediaStream)
-      setIsCameraOn(true)
+      console.log('[Camera] Camera stream obtained:', mediaStream.getVideoTracks().length, 'video tracks')
 
-      if (videoRef.current) {
-        videoRef.current.srcObject = mediaStream
-        // Ensure video starts playing
-        videoRef.current.play().catch((err) => {
-          console.error('Error playing video:', err)
-        })
-      }
+      setIsCameraOn(true)
+      setStream(mediaStream)
     } catch (err: any) {
-      console.error('Error accessing camera:', err)
+      console.error('[Camera] Error accessing camera:', err)
 
       if (err.name === 'NotAllowedError' || err.name === 'PermissionDeniedError') {
         setError('Camera access denied. Please allow camera permissions.')
@@ -76,16 +94,18 @@ export function UserCamera() {
 
   return (
     <div className="relative w-full h-full bg-gray-900">
-      {isCameraOn ? (
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover"
-        />
-      ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+      {/* Always render video element, toggle visibility */}
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        muted
+        className={`w-full h-full object-cover ${isCameraOn ? 'block' : 'hidden'}`}
+      />
+
+      {/* Camera off state */}
+      {!isCameraOn && (
+        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
           <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-3">
             <Video className="w-8 h-8 text-blue-400" />
           </div>

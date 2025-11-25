@@ -18,25 +18,42 @@ export function NewsletterSignup() {
 
     setIsLoading(true)
 
-    // Log the email for now (will connect to a service later)
-    console.log('Newsletter signup email:', email)
+    try {
+      const response = await fetch('/api/newsletter', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email,
+          source: 'landing_page',
+        }),
+      })
 
-    // Track newsletter signup
-    trackEvent<NewsletterSignupProps>(ANALYTICS_EVENTS.NEWSLETTER_SIGNUP, {
-      source: 'landing_page',
-    })
+      const data = await response.json()
 
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500))
+      if (!response.ok) {
+        console.error('Newsletter signup failed:', data.error)
+        // Still show success to avoid exposing email enumeration
+      }
 
-    setIsSubmitted(true)
-    setIsLoading(false)
-    setEmail('')
+      // Track newsletter signup
+      trackEvent<NewsletterSignupProps>(ANALYTICS_EVENTS.NEWSLETTER_SIGNUP, {
+        source: 'landing_page',
+      })
 
-    // Reset success message after 5 seconds
-    setTimeout(() => {
-      setIsSubmitted(false)
-    }, 5000)
+      setIsSubmitted(true)
+      setEmail('')
+
+      // Reset success message after 5 seconds
+      setTimeout(() => {
+        setIsSubmitted(false)
+      }, 5000)
+    } catch (error) {
+      console.error('Newsletter signup error:', error)
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   return (
