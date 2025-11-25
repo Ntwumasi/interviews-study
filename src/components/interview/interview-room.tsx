@@ -11,7 +11,8 @@ import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Video, Mic, MicOff } from 'lucide-react'
+import { Video, Mic, MicOff, Circle } from 'lucide-react'
+import { InterviewRecorder } from './interview-recorder'
 import {
   Dialog,
   DialogContent,
@@ -302,6 +303,10 @@ export function InterviewRoom({
                   >
                     {isMicMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
                   </Button>
+                </div>
+                {/* Recording Controls */}
+                <div className="mt-2">
+                  <InterviewRecorder interviewId={interviewId} />
                 </div>
               </div>
 

@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, TrendingUp, MessageSquare, Lightbulb, CheckCircle2, AlertCircle } from 'lucide-react'
+import { ArrowLeft, TrendingUp, MessageSquare, Lightbulb, CheckCircle2, AlertCircle, PlayCircle, Video } from 'lucide-react'
+import { InterviewPlayer } from '@/components/interview/interview-player'
 import ReactMarkdown from 'react-markdown'
 
 interface FeedbackDisplayProps {
@@ -230,6 +231,25 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
           <ReactMarkdown>{feedback.detailed_feedback}</ReactMarkdown>
         </div>
       </div>
+
+      {/* Video Recording Review */}
+      {interview.video_playback_id && (
+        <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
+          <div className="flex items-center gap-2 mb-6">
+            <Video className="h-5 w-5 text-purple-400" />
+            <h3 className="text-xl font-semibold text-white">Review Your Recording</h3>
+          </div>
+          <p className="text-gray-400 text-sm mb-6">
+            Watch your interview recording to see your body language, communication style, and identify areas for improvement.
+          </p>
+          <InterviewPlayer
+            playbackId={interview.video_playback_id}
+            transcript={interview.transcript || []}
+            duration={interview.video_duration}
+            title={scenario.title}
+          />
+        </div>
+      )}
 
       {/* Actions */}
       <div className="flex gap-4 justify-center">
