@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { Clock, AlertCircle } from 'lucide-react'
 
 interface InterviewTimerProps {
   durationMinutes: number
@@ -52,21 +51,16 @@ export function InterviewTimer({ durationMinutes, startedAt, onTimeUp }: Intervi
   const isCritical = timeRemaining <= 60 // 1 minute or less
 
   return (
-    <div
-      className={`flex items-center gap-2 px-4 py-2 rounded-lg font-mono text-lg font-semibold transition-colors ${
+    <span
+      className={`font-mono text-sm font-medium tabular-nums transition-colors ${
         isCritical
-          ? 'bg-red-500/20 text-red-400 animate-pulse'
+          ? 'text-red-500 animate-pulse'
           : isWarning
-          ? 'bg-yellow-500/20 text-yellow-400'
-          : 'bg-white/5 text-gray-300'
+          ? 'text-amber-500'
+          : 'text-gray-500 dark:text-gray-400'
       }`}
     >
-      {isCritical ? (
-        <AlertCircle className="h-5 w-5" />
-      ) : (
-        <Clock className="h-5 w-5" />
-      )}
-      <span>{formatTime(timeRemaining)}</span>
-    </div>
+      {formatTime(timeRemaining)}
+    </span>
   )
 }

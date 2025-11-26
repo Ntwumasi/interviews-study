@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Code2, Play } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Play, Command } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
 // Dynamically import Monaco Editor to avoid SSR issues
@@ -14,31 +13,66 @@ interface CodeWorkspaceProps {
   onRunningChange?: (isRunning: boolean) => void
 }
 
+// Better default code templates per language
+const DEFAULT_TEMPLATES: Record<string, string> = {
+  javascript: `function solution(nums, target) {
+  // Your solution here
+
+}
+
+// Example usage:
+// console.log(solution([2, 7, 11, 15], 9))
+`,
+  python: `def solution(nums, target):
+    # Your solution here
+    pass
+
+# Example usage:
+# print(solution([2, 7, 11, 15], 9))
+`,
+  java: `class Solution {
+    public int[] solution(int[] nums, int target) {
+        // Your solution here
+        return new int[]{};
+    }
+}
+`,
+  cpp: `#include <vector>
+using namespace std;
+
+class Solution {
+public:
+    vector<int> solution(vector<int>& nums, int target) {
+        // Your solution here
+        return {};
+    }
+};
+`,
+  go: `package main
+
+func solution(nums []int, target int) []int {
+    // Your solution here
+    return []int{}
+}
+`,
+}
+
 export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: CodeWorkspaceProps) {
-  const [code, setCode] = useState('// Write your code here\n\n')
+  const [code, setCode] = useState(DEFAULT_TEMPLATES.javascript)
   const [language, setLanguage] = useState('javascript')
   const [isSaving, setIsSaving] = useState(false)
-  const [theme, setTheme] = useState<'vs-dark' | 'light'>('vs-dark')
+  const [theme] = useState<'vs-dark'>('vs-dark')
 
-  // Listen for theme changes
-  useEffect(() => {
-    const updateTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark')
-      setTheme(isDark ? 'vs-dark' : 'light')
+  // Handle language change - update template if user hasn't written code
+  const handleLanguageChange = (newLanguage: string) => {
+    const isDefaultCode = Object.values(DEFAULT_TEMPLATES).some(
+      template => code.trim() === template.trim()
+    )
+    setLanguage(newLanguage)
+    if (isDefaultCode) {
+      setCode(DEFAULT_TEMPLATES[newLanguage] || DEFAULT_TEMPLATES.javascript)
     }
-
-    // Initial check
-    updateTheme()
-
-    // Watch for theme changes
-    const observer = new MutationObserver(updateTheme)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-
-    return () => observer.disconnect()
-  }, [])
+  }
 
   // Load saved code on mount
   useEffect(() => {
@@ -64,8 +98,12 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
   // Auto-save code with debouncing
   useEffect(() => {
     const saveTimer = setTimeout(async () => {
-      if (code === '// Write your code here\n\n') {
-        return // Don't save default placeholder
+      // Don't save default templates
+      const isDefaultCode = Object.values(DEFAULT_TEMPLATES).some(
+        template => code.trim() === template.trim()
+      )
+      if (isDefaultCode) {
+        return
       }
 
       setIsSaving(true)
@@ -116,39 +154,40 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
   }
 
   return (
-    <div className="h-full w-full flex flex-col bg-[#1e1e1e] dark:bg-[#1e1e1e] bg-white">
-      {/* Header - Fixed Position */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-50 dark:bg-black/20 shadow-lg z-10">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Code2 className="h-4 w-4 text-green-600 dark:text-green-400" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Code Editor</h3>
-            {isSaving && (
-              <span className="text-xs text-gray-600 dark:text-gray-400 animate-pulse">Saving...</span>
-            )}
-          </div>
-          <div className="flex items-center gap-2">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="bg-white dark:bg-[#3c3c3c] border border-gray-300 dark:border-white/10 rounded px-2 py-1 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="javascript">JavaScript</option>
-              <option value="python">Python</option>
-              <option value="java">Java</option>
-              <option value="cpp">C++</option>
-              <option value="go">Go</option>
-            </select>
-            <Button
-              size="sm"
-              onClick={handleRun}
-              className="bg-green-600 hover:bg-green-700 text-white h-7 text-xs px-3"
-            >
-              <Play className="h-3 w-3 mr-1" />
-              Run
-            </Button>
-          </div>
+    <div className="h-full w-full flex flex-col bg-[#1a1a1a]">
+      {/* Minimal Toolbar */}
+      <div className="flex-shrink-0 h-10 px-3 flex items-center justify-between border-b border-white/[0.06] bg-[#0f0f0f]">
+        {/* Left: Language selector */}
+        <div className="flex items-center gap-3">
+          <select
+            value={language}
+            onChange={(e) => handleLanguageChange(e.target.value)}
+            className="h-7 px-2.5 bg-white/[0.06] border-0 rounded-md text-[13px] text-gray-300 focus:outline-none focus:ring-1 focus:ring-white/20 cursor-pointer hover:bg-white/[0.08] transition-colors appearance-none pr-7"
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23666'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 6px center', backgroundSize: '14px' }}
+          >
+            <option value="javascript">JavaScript</option>
+            <option value="python">Python</option>
+            <option value="java">Java</option>
+            <option value="cpp">C++</option>
+            <option value="go">Go</option>
+          </select>
+          {isSaving && (
+            <span className="text-[11px] text-gray-500 animate-pulse">Saving...</span>
+          )}
         </div>
+
+        {/* Right: Run button with keyboard hint */}
+        <button
+          onClick={handleRun}
+          className="h-7 px-3 flex items-center gap-2 bg-green-600/90 hover:bg-green-600 text-white text-[13px] font-medium rounded-md transition-colors"
+        >
+          <Play className="h-3 w-3 fill-current" />
+          <span>Run</span>
+          <kbd className="hidden sm:inline-flex h-4 px-1.5 items-center gap-0.5 rounded bg-white/20 text-[10px] font-medium">
+            <Command className="h-2.5 w-2.5" />
+            <span>↵</span>
+          </kbd>
+        </button>
       </div>
 
       {/* Monaco Code Editor - Full Height */}
@@ -162,13 +201,20 @@ export function CodeWorkspace({ interviewId, onOutputChange, onRunningChange }: 
           theme={theme}
           options={{
             minimap: { enabled: false },
-            fontSize: 13,
+            fontSize: 14,
+            fontFamily: "'SF Mono', 'Fira Code', 'Monaco', monospace",
             lineNumbers: 'on',
             scrollBeyondLastLine: false,
             automaticLayout: true,
             tabSize: 2,
             wordWrap: 'on',
-            padding: { top: 8, bottom: 8 },
+            padding: { top: 16, bottom: 16 },
+            lineHeight: 22,
+            renderLineHighlight: 'line',
+            cursorBlinking: 'smooth',
+            smoothScrolling: true,
+            folding: true,
+            bracketPairColorization: { enabled: true },
           }}
         />
       </div>

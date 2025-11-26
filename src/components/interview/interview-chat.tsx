@@ -2,17 +2,16 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { TranscriptMessage } from '@/types'
-import { Button } from '@/components/ui/button'
-import { Send, Volume2, VolumeX, Mic, MicOff, MessageSquare } from 'lucide-react'
+import { Send, Volume2, VolumeX, Mic, Bot } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
 
 interface InterviewChatProps {
   transcript: TranscriptMessage[]
   onSendMessage: (message: string) => void
-  aiVoiceMuted?: boolean
+  isAISpeaking?: boolean
 }
 
-export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false }: InterviewChatProps) {
+export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false }: InterviewChatProps) {
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [voiceEnabled, setVoiceEnabled] = useState(true)
@@ -72,7 +71,7 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
 
   // Play voice for new AI messages
   useEffect(() => {
-    if (!voiceEnabled || aiVoiceMuted || transcript.length === 0) return
+    if (!voiceEnabled || transcript.length === 0) return
 
     // Check if there's a new AI message
     if (transcript.length > lastMessageCountRef.current) {
@@ -84,7 +83,7 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
     }
 
     lastMessageCountRef.current = transcript.length
-  }, [transcript, voiceEnabled, aiVoiceMuted])
+  }, [transcript, voiceEnabled])
 
   const playVoice = async (text: string) => {
     try {
@@ -205,116 +204,113 @@ export function InterviewChat({ transcript, onSendMessage, aiVoiceMuted = false 
   }
 
   return (
-    <div className="h-full flex flex-col">
-      {/* Chat Header */}
-      <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-100 dark:bg-black/20">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-            <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Interview Chat</h3>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleVoice}
-              className={`h-8 w-8 p-0 ${voiceEnabled ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500 dark:text-gray-500'}`}
-              title={voiceEnabled ? 'Mute AI Voice' : 'Unmute AI Voice'}
+    <div className="h-full flex flex-col bg-[#0a0a0a]">
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto px-4 py-4">
+        <div className="space-y-4">
+          {transcript.map((message, index) => (
+            <div
+              key={index}
+              className={`flex gap-3 ${message.role === 'user' ? 'flex-row-reverse' : ''}`}
             >
-              {voiceEnabled ? (
-                <Volume2 className="h-4 w-4" />
-              ) : (
-                <VolumeX className="h-4 w-4" />
+              {/* Avatar - Only for AI */}
+              {message.role === 'assistant' && (
+                <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                  <Bot className="w-4 h-4 text-white" />
+                </div>
               )}
-            </Button>
-          </div>
+
+              {/* Message Bubble */}
+              <div
+                className={`max-w-[85%] ${
+                  message.role === 'user'
+                    ? 'bg-blue-600 text-white rounded-2xl rounded-tr-md px-4 py-2.5'
+                    : 'text-gray-200'
+                }`}
+              >
+                {message.role === 'assistant' ? (
+                  <div className="prose prose-sm prose-invert max-w-none prose-p:leading-relaxed prose-p:my-1.5 prose-headings:text-white prose-strong:text-white prose-code:text-blue-300 prose-code:bg-white/10 prose-code:px-1 prose-code:py-0.5 prose-code:rounded">
+                    <ReactMarkdown>{message.content}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-[14px] leading-relaxed whitespace-pre-wrap">{message.content}</p>
+                )}
+              </div>
+            </div>
+          ))}
+
+          {/* Typing Indicator */}
+          {(isLoading || isAISpeaking) && (
+            <div className="flex gap-3">
+              <div className="flex-shrink-0 w-7 h-7 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center">
+                <Bot className="w-4 h-4 text-white" />
+              </div>
+              <div className="flex items-center gap-1.5 py-2">
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <span className="w-2 h-2 bg-gray-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            </div>
+          )}
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
-        {transcript.map((message, index) => (
-          <div
-            key={index}
-            className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
-          >
-            <div
-              className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
-                message.role === 'user'
-                  ? 'bg-blue-600 dark:bg-white/10 text-white'
-                  : 'bg-gray-100 dark:bg-white/5 text-gray-900 dark:text-gray-200'
-              }`}
-            >
-              {message.role === 'assistant' ? (
-                <div className="prose dark:prose-invert prose-sm max-w-none">
-                  <ReactMarkdown>{message.content}</ReactMarkdown>
-                </div>
-              ) : (
-                <p className="whitespace-pre-wrap text-sm">{message.content}</p>
-              )}
-            </div>
-          </div>
-        ))}
-        {isLoading && (
-          <div className="flex justify-start">
-            <div className="bg-gray-100 dark:bg-white/5 text-gray-700 dark:text-gray-400 border border-gray-200 dark:border-white/10 rounded-lg px-4 py-3">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1">
-                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-gray-700 dark:bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
-                </div>
-                <span className="text-sm">AI is thinking...</span>
-              </div>
-            </div>
-          </div>
-        )}
-        <div ref={messagesEndRef} />
-      </div>
-
-      {/* Input */}
-      <div className="border-t border-gray-200 dark:border-white/10 p-3 bg-gray-50 dark:bg-black/30 backdrop-blur-sm">
+      {/* Input Area */}
+      <div className="flex-shrink-0 p-3 border-t border-white/[0.06]">
         <form onSubmit={handleSubmit} className="relative">
           <textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your response..."
-            className="w-full bg-white dark:bg-white/5 border border-gray-300 dark:border-white/10 rounded-xl pl-4 pr-12 py-3 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:focus:ring-white/20 resize-none min-h-[48px] max-h-[200px]"
+            placeholder="Ask a question or share your thoughts..."
+            className="w-full bg-white/[0.04] border border-white/[0.08] rounded-xl pl-4 pr-24 py-3 text-[14px] text-white placeholder-gray-500 focus:outline-none focus:border-white/20 resize-none min-h-[48px] max-h-[120px] transition-colors"
             disabled={isLoading}
             rows={1}
           />
 
-          {/* Dynamic Icon: Voice when empty, Send when typing */}
-          {input.trim() ? (
-            <Button
-              type="submit"
-              disabled={isLoading}
-              className="absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 flex items-center justify-center text-gray-700 dark:text-white"
-              variant="ghost"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          ) : (
-            <Button
+          {/* Right side controls */}
+          <div className="absolute right-2 bottom-2 flex items-center gap-1">
+            {/* Voice toggle */}
+            <button
               type="button"
-              onClick={toggleMicrophone}
-              disabled={!speechSupported}
-              className={`absolute right-2 bottom-2.5 h-8 w-8 p-0 rounded-lg flex items-center justify-center ${
-                isListening
-                  ? 'bg-red-500/20 hover:bg-red-500/30 text-red-600 dark:text-red-400'
-                  : 'bg-gray-200 dark:bg-white/10 hover:bg-gray-300 dark:hover:bg-white/20 text-gray-700 dark:text-white'
-              } disabled:opacity-30`}
-              variant="ghost"
+              onClick={toggleVoice}
+              className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
+                voiceEnabled
+                  ? 'text-blue-400 hover:bg-blue-500/10'
+                  : 'text-gray-500 hover:bg-white/5'
+              }`}
+              title={voiceEnabled ? 'Mute AI voice' : 'Unmute AI voice'}
             >
-              {isListening ? (
-                <Mic className="h-4 w-4 animate-pulse" />
-              ) : (
-                <Mic className="h-4 w-4" />
-              )}
-            </Button>
-          )}
+              {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+            </button>
+
+            {/* Mic / Send button */}
+            {input.trim() ? (
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="h-8 w-8 flex items-center justify-center rounded-lg bg-blue-600 hover:bg-blue-500 text-white transition-colors disabled:opacity-50"
+              >
+                <Send className="h-4 w-4" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={toggleMicrophone}
+                disabled={!speechSupported}
+                className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
+                  isListening
+                    ? 'bg-red-500/20 text-red-400'
+                    : 'hover:bg-white/5 text-gray-400 hover:text-white'
+                } disabled:opacity-30`}
+                title={isListening ? 'Stop listening' : 'Use voice input'}
+              >
+                <Mic className={`h-4 w-4 ${isListening ? 'animate-pulse' : ''}`} />
+              </button>
+            )}
+          </div>
         </form>
       </div>
     </div>

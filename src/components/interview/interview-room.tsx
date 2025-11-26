@@ -7,11 +7,9 @@ import { DURATION_BY_TYPE } from '@/types'
 import { InterviewTimer } from './interview-timer'
 import { InterviewChat } from './interview-chat'
 import { InterviewWorkspace } from './interview-workspace'
-import { AIInterviewerAvatar } from './ai-interviewer-avatar'
 import { UserCamera } from './user-camera'
 import { Button } from '@/components/ui/button'
-import { ThemeToggle } from '@/components/ui/theme-toggle'
-import { Video, Mic, MicOff, Circle } from 'lucide-react'
+import { LogOut, ChevronDown, ChevronUp } from 'lucide-react'
 import { InterviewRecorder } from './interview-recorder'
 import {
   Dialog,
@@ -47,7 +45,7 @@ export function InterviewRoom({
   const [codeOutput, setCodeOutput] = useState('')
   const [isRunningCode, setIsRunningCode] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [isMicMuted, setIsMicMuted] = useState(false)
+  const [isOutputExpanded, setIsOutputExpanded] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -163,198 +161,165 @@ export function InterviewRoom({
     }
   }, [])
 
+  // Auto-expand output when code runs
+  useEffect(() => {
+    if (codeOutput && codeOutput !== 'Run your code to see output here...') {
+      setIsOutputExpanded(true)
+    }
+  }, [codeOutput])
+
+  // Format interview type for display
+  const formatInterviewType = (type: string) => {
+    return type.replace('_', ' ').split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+  }
+
   return (
-    <div className="h-screen flex flex-col bg-gradient-to-br from-gray-50 via-gray-100 to-gray-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
-      {/* Modern Header - Sleek & Spacious */}
-      <div className="border-b border-gray-200 dark:border-white/10 bg-white/90 dark:bg-black/20 backdrop-blur-xl">
-        <div className="px-6 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div>
-              <h1 className="text-xl font-semibold text-gray-900 dark:text-white tracking-tight">{scenario.title}</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400 mt-0.5">
-                {interviewType.replace('_', ' ').charAt(0).toUpperCase() +
-                  interviewType.replace('_', ' ').slice(1)} • {scenario.difficulty}
-              </p>
+    <div className="h-screen flex flex-col bg-[#0f0f0f]">
+      {/* Minimal Header - Apple-inspired */}
+      <header className="flex-shrink-0 h-12 border-b border-white/[0.08] bg-[#0f0f0f]/80 backdrop-blur-xl">
+        <div className="h-full px-4 flex items-center justify-between">
+          {/* Left: Title + Meta inline */}
+          <div className="flex items-center gap-3">
+            <h1 className="text-[15px] font-medium text-white tracking-tight">
+              {scenario.title}
+            </h1>
+            <div className="flex items-center gap-2 text-[13px] text-gray-500">
+              <span className="capitalize">{formatInterviewType(interviewType)}</span>
+              <span className="text-gray-600">·</span>
+              <span className="capitalize">{scenario.difficulty}</span>
+              <span className="text-gray-600">·</span>
+              <InterviewTimer
+                durationMinutes={durationMinutes}
+                startedAt={startedAt}
+                onTimeUp={handleTimeUp}
+              />
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
-            <InterviewTimer
-              durationMinutes={durationMinutes}
-              startedAt={startedAt}
-              onTimeUp={handleTimeUp}
+          {/* Right: Leave button only */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEndInterview}
+            disabled={isSubmitting}
+            className="h-8 px-3 text-gray-400 hover:text-white hover:bg-white/10 gap-1.5"
+          >
+            <LogOut className="h-3.5 w-3.5" />
+            <span className="text-[13px]">Leave</span>
+          </Button>
+        </div>
+      </header>
+
+      {/* Main Content - Two Column Layout */}
+      <div className="flex-1 overflow-hidden flex">
+        {/* Left: Code Editor + Collapsible Output */}
+        <div className="flex-1 min-w-0 flex flex-col border-r border-white/[0.08]">
+          {/* Code Editor */}
+          <div className="flex-1 min-h-0">
+            {interviewType === 'coding' || interviewType === 'system_design' ? (
+              <InterviewWorkspace
+                interviewId={interviewId}
+                interviewType={interviewType}
+                onOutputChange={setCodeOutput}
+                onRunningChange={setIsRunningCode}
+              />
+            ) : (
+              <div className="h-full bg-[#0f0f0f]" />
+            )}
+          </div>
+
+          {/* Collapsible Output Panel - Only for coding */}
+          {interviewType === 'coding' && (
+            <div className={`flex-shrink-0 border-t border-white/[0.08] bg-[#0a0a0a] transition-all duration-200 ${isOutputExpanded ? 'h-48' : 'h-9'}`}>
+              {/* Output Header - Clickable to toggle */}
+              <button
+                onClick={() => setIsOutputExpanded(!isOutputExpanded)}
+                className="w-full h-9 px-4 flex items-center justify-between hover:bg-white/[0.02] transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-[12px] font-medium text-gray-500 uppercase tracking-wider">Output</span>
+                  {isRunningCode && (
+                    <span className="h-1.5 w-1.5 bg-green-500 rounded-full animate-pulse" />
+                  )}
+                  {codeOutput && !isRunningCode && codeOutput !== 'Run your code to see output here...' && (
+                    <span className="h-1.5 w-1.5 bg-blue-500 rounded-full" />
+                  )}
+                </div>
+                {isOutputExpanded ? (
+                  <ChevronDown className="h-3.5 w-3.5 text-gray-500" />
+                ) : (
+                  <ChevronUp className="h-3.5 w-3.5 text-gray-500" />
+                )}
+              </button>
+
+              {/* Output Content */}
+              {isOutputExpanded && (
+                <div className="h-[calc(100%-36px)] overflow-y-auto px-4 pb-3">
+                  <pre className="font-mono text-[13px] text-gray-400 whitespace-pre-wrap leading-relaxed">
+                    {codeOutput || (
+                      <span className="text-gray-600">Output will appear here when you run your code</span>
+                    )}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Right: Chat + Video Panel */}
+        <div className="w-[380px] flex-shrink-0 flex flex-col bg-[#0a0a0a]">
+          {/* Chat Area - Takes most space */}
+          <div className="flex-1 min-h-0 border-b border-white/[0.08]">
+            <InterviewChat
+              transcript={transcript}
+              onSendMessage={handleSendMessage}
+              isAISpeaking={isAISpeaking}
             />
-            <ThemeToggle />
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={handleEndInterview}
-              disabled={isSubmitting}
-            >
-              Leave
-            </Button>
+          </div>
+
+          {/* Compact Video + Recording Section */}
+          <div className="flex-shrink-0 p-3">
+            {/* User Camera with Recording Overlay */}
+            <div className="relative aspect-video rounded-lg overflow-hidden bg-[#1a1a1a] border border-white/[0.08]">
+              <UserCamera />
+
+              {/* Recording Indicator Overlay */}
+              <div className="absolute top-2 left-2 right-2 flex items-center justify-between">
+                <InterviewRecorder interviewId={interviewId} />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 overflow-hidden flex flex-col">
-        {isMobile ? (
-          /* Mobile Layout - Stacked Design */
-          <div className="flex flex-col h-full">
-            {/* Workspace */}
-            <div className="flex-1 min-h-0 bg-[#1e1e1e]">
-              {interviewType === 'coding' || interviewType === 'system_design' ? (
-                <InterviewWorkspace
-                  interviewId={interviewId}
-                  interviewType={interviewType}
-                />
-              ) : (
-                <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-              )}
-            </div>
-
-            {/* Mobile Video & Chat */}
-            <div className="flex-shrink-0 h-2/5 flex flex-col border-t border-white/10 bg-black/30 backdrop-blur-xl">
-              {/* Video Tabs */}
-              <div className="flex gap-2 p-2 border-b border-white/10">
-                <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
-                  <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-                </div>
-                <div className="flex-1 aspect-video rounded-lg overflow-hidden border border-white/20 bg-black/40">
-                  <UserCamera />
-                </div>
-              </div>
-              {/* Chat */}
-              <div className="flex-1 min-h-0">
-                <InterviewChat
-                  transcript={transcript}
-                  onSendMessage={handleSendMessage}
-                  aiVoiceMuted={isMicMuted}
-                />
-              </div>
-            </div>
-          </div>
-        ) : (
-          /* Desktop Layout - 3 Column: Editor (col-7) + Chat (col-3) + Video (col-2) */
-          <div className="flex h-full">
-            {/* Editor Area - 58.33% width (col-7 equivalent) */}
-            <div className="w-7/12 min-w-0 bg-white dark:bg-[#1e1e1e] border-r border-gray-200 dark:border-white/10 flex flex-col">
-              {/* Editor */}
-              <div className="flex-1 overflow-hidden">
-                {interviewType === 'coding' || interviewType === 'system_design' ? (
-                  <InterviewWorkspace
-                    interviewId={interviewId}
-                    interviewType={interviewType}
-                    onOutputChange={setCodeOutput}
-                    onRunningChange={setIsRunningCode}
-                  />
-                ) : (
-                  <div className="h-full bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900" />
-                )}
-              </div>
-
-              {/* Output Panel - Only for coding */}
-              {interviewType === 'coding' && (
-                <div className="h-60 flex-shrink-0 border-t border-gray-200 dark:border-white/10 bg-white dark:bg-[#1e1e1e]">
-                  <div className="h-full flex flex-col">
-                    <div className="flex-shrink-0 px-4 py-2 border-b border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-[#252526] flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide">Output</div>
-                        {isRunningCode && (
-                          <span className="h-2 w-2 bg-green-400 rounded-full animate-pulse" />
-                        )}
-                      </div>
-                    </div>
-                    <div className="flex-1 overflow-y-auto p-4">
-                      <pre className="font-mono text-sm text-gray-900 dark:text-gray-300 whitespace-pre-wrap leading-relaxed">
-                        {codeOutput || 'Run your code to see output here...'}
-                      </pre>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Chat Area - 25% width (col-3 equivalent) */}
-            <div className="w-3/12 flex-shrink-0 border-r border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-black/20">
-              <InterviewChat
-                transcript={transcript}
-                onSendMessage={handleSendMessage}
-                aiVoiceMuted={isMicMuted}
-              />
-            </div>
-
-            {/* Video Area - 16.67% width (col-2 equivalent) */}
-            <div className="w-2/12 flex-shrink-0 flex flex-col bg-gray-50 dark:bg-black/20">
-              {/* Video Header */}
-              <div className="flex-shrink-0 border-b border-gray-200 dark:border-white/10 px-4 py-3 bg-gray-100 dark:bg-black/20">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Video className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Video</h3>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setIsMicMuted(!isMicMuted)}
-                    className={`h-8 w-8 p-0 ${isMicMuted ? 'text-gray-500 dark:text-gray-500' : 'text-purple-600 dark:text-purple-400'}`}
-                    title={isMicMuted ? 'Unmute AI' : 'Mute AI'}
-                  >
-                    {isMicMuted ? <MicOff className="h-4 w-4" /> : <Mic className="h-4 w-4" />}
-                  </Button>
-                </div>
-                {/* Recording Controls */}
-                <div className="mt-2">
-                  <InterviewRecorder interviewId={interviewId} />
-                </div>
-              </div>
-
-              {/* Video Content */}
-              <div className="flex-1 flex flex-col gap-3 p-3">
-                {/* AI Interviewer Video - Square */}
-                <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                  <AIInterviewerAvatar isSpeaking={isAISpeaking} interviewType={interviewType} />
-                </div>
-
-                {/* User Camera - Square */}
-                <div className="relative aspect-square rounded-lg overflow-hidden border border-white/20 shadow-xl bg-black/40 backdrop-blur-sm">
-                  <UserCamera />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
       {/* End Interview Confirmation Dialog */}
       <Dialog open={isEndDialogOpen} onOpenChange={setIsEndDialogOpen}>
-        <DialogContent className="bg-gray-900 border border-white/10">
+        <DialogContent className="bg-[#1a1a1a] border border-white/[0.08] max-w-sm">
           <DialogHeader>
-            <DialogTitle className="text-white">
-              {timeUp ? 'Time\'s Up!' : 'Leave Interview?'}
+            <DialogTitle className="text-[17px] font-semibold text-white">
+              {timeUp ? "Time's Up" : 'Leave Interview?'}
             </DialogTitle>
-            <DialogDescription className="text-gray-400">
+            <DialogDescription className="text-[14px] text-gray-400 leading-relaxed">
               {timeUp
-                ? 'Your time is up. Your interview will be submitted for feedback.'
-                : 'Are you sure you want to leave this interview? Your progress will be saved and you\'ll receive feedback.'}
+                ? 'Your interview will be submitted for feedback.'
+                : 'Your progress will be saved and you\'ll receive detailed feedback.'}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter>
+          <DialogFooter className="gap-2 sm:gap-2">
             {!timeUp && (
               <Button
                 variant="ghost"
                 onClick={() => setIsEndDialogOpen(false)}
                 disabled={isSubmitting}
-                className="text-white hover:bg-white/10"
+                className="text-gray-400 hover:text-white hover:bg-white/10"
               >
-                Stay in Interview
+                Cancel
               </Button>
             )}
             <Button
               onClick={handleConfirmEnd}
               disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-700"
+              className="bg-blue-600 hover:bg-blue-500 text-white"
             >
               {isSubmitting ? 'Submitting...' : 'Submit & Get Feedback'}
             </Button>

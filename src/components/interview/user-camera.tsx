@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { Video, VideoOff } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 export function UserCamera() {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -93,8 +92,8 @@ export function UserCamera() {
   }, [stream])
 
   return (
-    <div className="relative w-full h-full bg-gray-900">
-      {/* Always render video element, toggle visibility */}
+    <div className="relative w-full h-full bg-[#1a1a1a]">
+      {/* Video element - always rendered */}
       <video
         ref={videoRef}
         autoPlay
@@ -103,41 +102,37 @@ export function UserCamera() {
         className={`w-full h-full object-cover ${isCameraOn ? 'block' : 'hidden'}`}
       />
 
-      {/* Camera off state */}
+      {/* Camera off state - minimal */}
       {!isCameraOn && (
-        <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
-          <div className="w-16 h-16 rounded-full bg-blue-500/20 flex items-center justify-center mb-3">
-            <Video className="w-8 h-8 text-blue-400" />
-          </div>
-          <p className="text-gray-400 text-sm mb-2">Camera Off</p>
-          {error && <p className="text-red-400 text-xs mb-3 text-center px-4 max-w-xs">{error}</p>}
-          <Button
-            size="sm"
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <button
             onClick={startCamera}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="flex flex-col items-center gap-2 p-4 rounded-xl hover:bg-white/5 transition-colors group"
           >
-            Turn On Camera
-          </Button>
+            <div className="w-12 h-12 rounded-full bg-white/[0.08] flex items-center justify-center group-hover:bg-white/[0.12] transition-colors">
+              <Video className="w-5 h-5 text-gray-400" />
+            </div>
+            <span className="text-[12px] text-gray-500 group-hover:text-gray-400">Turn on camera</span>
+          </button>
+          {error && (
+            <p className="text-red-400/80 text-[11px] mt-2 text-center px-4 max-w-[200px]">{error}</p>
+          )}
         </div>
       )}
 
-      {/* Controls */}
+      {/* Camera on - minimal controls */}
       {isCameraOn && (
-        <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2">
+        <>
+          {/* Turn off button - bottom center */}
           <button
             onClick={stopCamera}
-            className="p-2.5 rounded-full bg-red-600 hover:bg-red-700 transition-colors shadow-lg"
+            className="absolute bottom-2 left-1/2 -translate-x-1/2 p-2 rounded-full bg-black/60 hover:bg-red-600 transition-colors"
             title="Turn off camera"
           >
-            <VideoOff className="w-4 h-4 text-white" />
+            <VideoOff className="w-3.5 h-3.5 text-white" />
           </button>
-        </div>
+        </>
       )}
-
-      {/* Label */}
-      <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-sm px-3 py-1 rounded text-xs text-white font-medium">
-        You
-      </div>
     </div>
   )
 }

@@ -1,8 +1,7 @@
 'use client'
 
 import { useState, useRef, useCallback, useEffect } from 'react'
-import { Video, VideoOff, Circle, Square, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Circle, Square, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
 
 interface InterviewRecorderProps {
   interviewId: string
@@ -199,96 +198,70 @@ export function InterviewRecorder({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`
   }
 
-  // Render based on state
-  const renderContent = () => {
-    switch (recordingState) {
-      case 'idle':
-        return (
-          <Button
-            onClick={startRecording}
-            variant="outline"
-            size="sm"
-            className="gap-2 text-red-400 border-red-400/50 hover:bg-red-500/10"
-          >
-            <Circle className="w-3 h-3 fill-current" />
-            Start Recording
-          </Button>
-        )
-
-      case 'recording':
-        return (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 rounded-full">
-              <Circle className="w-2 h-2 fill-red-500 text-red-500 animate-pulse" />
-              <span className="text-red-400 text-sm font-mono">{formatDuration(duration)}</span>
-            </div>
-            <Button
-              onClick={stopRecording}
-              variant="outline"
-              size="sm"
-              className="gap-2 text-white border-white/30 hover:bg-white/10"
-            >
-              <Square className="w-3 h-3 fill-current" />
-              Stop
-            </Button>
-          </div>
-        )
-
-      case 'stopped':
-        return (
-          <div className="flex items-center gap-2 text-gray-400 text-sm">
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Processing...
-          </div>
-        )
-
-      case 'uploading':
-        return (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2">
-              <Upload className="w-4 h-4 text-blue-400" />
-              <span className="text-blue-400 text-sm">Uploading: {uploadProgress}%</span>
-            </div>
-            <div className="w-24 h-1.5 bg-gray-700 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-blue-500 transition-all duration-300"
-                style={{ width: `${uploadProgress}%` }}
-              />
-            </div>
-          </div>
-        )
-
-      case 'complete':
-        return (
-          <div className="flex items-center gap-2 text-green-400 text-sm">
-            <CheckCircle2 className="w-4 h-4" />
-            Recording saved
-          </div>
-        )
-
-      case 'error':
-        return (
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-2 text-red-400 text-sm">
-              <AlertCircle className="w-4 h-4" />
-              {error || 'Recording failed'}
-            </div>
-            <Button
-              onClick={startRecording}
-              variant="outline"
-              size="sm"
-              className="gap-2 text-white border-white/30 hover:bg-white/10 ml-2"
-            >
-              Retry
-            </Button>
-          </div>
-        )
-    }
-  }
-
+  // Minimal pill-style recorder UI
   return (
     <div className="flex items-center">
-      {renderContent()}
+      {recordingState === 'idle' && (
+        <button
+          onClick={startRecording}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+        >
+          <Circle className="w-2 h-2 text-red-500 fill-current" />
+          <span className="text-[11px] text-white font-medium">Record</span>
+        </button>
+      )}
+
+      {recordingState === 'recording' && (
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/90 backdrop-blur-sm">
+            <Circle className="w-2 h-2 text-white fill-current animate-pulse" />
+            <span className="text-[11px] text-white font-mono font-medium">{formatDuration(duration)}</span>
+          </div>
+          <button
+            onClick={stopRecording}
+            className="flex items-center justify-center w-6 h-6 rounded-full bg-black/60 backdrop-blur-sm hover:bg-black/80 transition-colors"
+            title="Stop recording"
+          >
+            <Square className="w-2.5 h-2.5 text-white fill-current" />
+          </button>
+        </div>
+      )}
+
+      {recordingState === 'stopped' && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+          <Loader2 className="w-3 h-3 text-white animate-spin" />
+          <span className="text-[11px] text-white">Processing...</span>
+        </div>
+      )}
+
+      {recordingState === 'uploading' && (
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/60 backdrop-blur-sm">
+          <div className="w-12 h-1 bg-white/20 rounded-full overflow-hidden">
+            <div
+              className="h-full bg-blue-500 transition-all duration-300"
+              style={{ width: `${uploadProgress}%` }}
+            />
+          </div>
+          <span className="text-[11px] text-white">{uploadProgress}%</span>
+        </div>
+      )}
+
+      {recordingState === 'complete' && (
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-green-500/20 backdrop-blur-sm">
+          <CheckCircle2 className="w-3 h-3 text-green-400" />
+          <span className="text-[11px] text-green-400">Saved</span>
+        </div>
+      )}
+
+      {recordingState === 'error' && (
+        <button
+          onClick={startRecording}
+          className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-500/20 backdrop-blur-sm hover:bg-red-500/30 transition-colors"
+        >
+          <AlertCircle className="w-3 h-3 text-red-400" />
+          <span className="text-[11px] text-red-400">Retry</span>
+        </button>
+      )}
     </div>
   )
 }
