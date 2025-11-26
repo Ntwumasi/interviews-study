@@ -122,21 +122,33 @@ export function InterviewRoom({
     setIsEndDialogOpen(true)
   }
 
-  const handleConfirmEnd = async () => {
+  const handleConfirmEnd = async (getFeedback: boolean = true) => {
     setIsSubmitting(true)
 
     try {
-      // Update interview status to completed
-      const response = await fetch(`/api/interviews/${interviewId}/complete`, {
-        method: 'POST',
-      })
+      if (getFeedback) {
+        // Update interview status to completed and get feedback
+        const response = await fetch(`/api/interviews/${interviewId}/complete`, {
+          method: 'POST',
+        })
 
-      if (!response.ok) {
-        throw new Error('Failed to end interview')
+        if (!response.ok) {
+          throw new Error('Failed to end interview')
+        }
+
+        // Navigate to feedback page
+        router.push(`/feedback/${interviewId}`)
+      } else {
+        // Just leave without feedback - mark as abandoned
+        await fetch(`/api/interviews/${interviewId}/abandon`, {
+          method: 'POST',
+        }).catch(() => {
+          // Silently fail - user just wants to leave
+        })
+
+        // Navigate to dashboard
+        router.push('/dashboard')
       }
-
-      // Navigate to feedback page
-      router.push(`/feedback/${interviewId}`)
     } catch (error) {
       console.error('Failed to end interview:', error)
       setIsSubmitting(false)
@@ -290,7 +302,7 @@ export function InterviewRoom({
 
       {/* End Interview Confirmation Dialog */}
       <Dialog open={isEndDialogOpen} onOpenChange={setIsEndDialogOpen}>
-        <DialogContent className="bg-[#1a1a1a] border border-white/[0.08] max-w-sm">
+        <DialogContent className="bg-[#1a1a1a] border border-white/[0.08] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-[17px] font-semibold text-white">
               {timeUp ? "Time's Up" : 'Leave Interview?'}
@@ -298,28 +310,79 @@ export function InterviewRoom({
             <DialogDescription className="text-[14px] text-gray-400 leading-relaxed">
               {timeUp
                 ? 'Your interview will be submitted for feedback.'
-                : 'Your progress will be saved and you\'ll receive detailed feedback.'}
+                : 'Choose how you want to exit this practice session.'}
             </DialogDescription>
           </DialogHeader>
-          <DialogFooter className="gap-2 sm:gap-2">
-            {!timeUp && (
+
+          {!timeUp ? (
+            <div className="space-y-3 py-2">
+              {/* Option 1: Submit & Get Feedback */}
+              <button
+                onClick={() => handleConfirmEnd(true)}
+                disabled={isSubmitting}
+                className="w-full p-4 rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] transition-colors text-left group disabled:opacity-50"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-5 h-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-medium text-white group-hover:text-blue-400 transition-colors">
+                      Submit & Get Feedback
+                    </h3>
+                    <p className="text-[13px] text-gray-500 mt-0.5">
+                      End the interview and receive detailed AI feedback with recommendations
+                    </p>
+                  </div>
+                </div>
+              </button>
+
+              {/* Option 2: Just Leave */}
+              <button
+                onClick={() => handleConfirmEnd(false)}
+                disabled={isSubmitting}
+                className="w-full p-4 rounded-lg border border-white/[0.08] bg-white/[0.02] hover:bg-white/[0.05] transition-colors text-left group disabled:opacity-50"
+              >
+                <div className="flex items-start gap-3">
+                  <div className="w-10 h-10 rounded-lg bg-gray-500/20 flex items-center justify-center flex-shrink-0">
+                    <LogOut className="w-5 h-5 text-gray-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-medium text-white group-hover:text-gray-300 transition-colors">
+                      Just Leave
+                    </h3>
+                    <p className="text-[13px] text-gray-500 mt-0.5">
+                      Exit without feedback - your progress won't be saved
+                    </p>
+                  </div>
+                </div>
+              </button>
+            </div>
+          ) : (
+            <DialogFooter className="gap-2 sm:gap-2">
               <Button
-                variant="ghost"
+                onClick={() => handleConfirmEnd(true)}
+                disabled={isSubmitting}
+                className="bg-blue-600 hover:bg-blue-500 text-white"
+              >
+                {isSubmitting ? 'Submitting...' : 'Get Feedback'}
+              </Button>
+            </DialogFooter>
+          )}
+
+          {!timeUp && (
+            <div className="pt-2 border-t border-white/[0.06]">
+              <button
                 onClick={() => setIsEndDialogOpen(false)}
                 disabled={isSubmitting}
-                className="text-gray-400 hover:text-white hover:bg-white/10"
+                className="text-[13px] text-gray-500 hover:text-gray-400 transition-colors"
               >
-                Cancel
-              </Button>
-            )}
-            <Button
-              onClick={handleConfirmEnd}
-              disabled={isSubmitting}
-              className="bg-blue-600 hover:bg-blue-500 text-white"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit & Get Feedback'}
-            </Button>
-          </DialogFooter>
+                Cancel and continue practicing
+              </button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
