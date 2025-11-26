@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { ArrowLeft, TrendingUp, MessageSquare, Lightbulb, CheckCircle2, AlertCircle, PlayCircle, Video } from 'lucide-react'
+import { ArrowLeft, TrendingUp, MessageSquare, Lightbulb, CheckCircle2, AlertCircle, Video, BookOpen, ExternalLink, ListChecks, Target } from 'lucide-react'
 import { InterviewPlayer } from '@/components/interview/interview-player'
 import ReactMarkdown from 'react-markdown'
 
@@ -225,12 +225,70 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
       </div>
 
       {/* Detailed Feedback */}
-      <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-8">
+      <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-6">
         <h3 className="text-xl font-semibold text-white mb-4">Detailed Feedback</h3>
         <div className="prose prose-invert prose-sm max-w-none prose-headings:text-gray-200 prose-p:text-gray-300 prose-strong:text-gray-200 prose-li:text-gray-300">
           <ReactMarkdown>{feedback.detailed_feedback}</ReactMarkdown>
         </div>
       </div>
+
+      {/* Next Steps - Action Items */}
+      {feedback.next_steps && feedback.next_steps.length > 0 && (
+        <div className="bg-gradient-to-br from-blue-500/10 to-purple-500/10 border border-blue-500/20 rounded-lg p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Target className="h-5 w-5 text-blue-400" />
+            <h3 className="text-xl font-semibold text-white">Your Next Steps</h3>
+          </div>
+          <p className="text-gray-400 text-sm mb-4">Focus on these action items before your next interview:</p>
+          <ol className="space-y-3">
+            {feedback.next_steps.map((step: string, index: number) => (
+              <li key={index} className="flex items-start gap-3">
+                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-sm font-medium">
+                  {index + 1}
+                </span>
+                <span className="text-gray-200">{step}</span>
+              </li>
+            ))}
+          </ol>
+        </div>
+      )}
+
+      {/* Recommended Resources */}
+      {feedback.recommended_resources && feedback.recommended_resources.length > 0 && (
+        <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-6">
+          <div className="flex items-center gap-2 mb-4">
+            <BookOpen className="h-5 w-5 text-purple-400" />
+            <h3 className="text-xl font-semibold text-white">Recommended Resources</h3>
+          </div>
+          <p className="text-gray-400 text-sm mb-4">Curated resources to help you improve:</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {feedback.recommended_resources.map((resource: any, index: number) => (
+              <a
+                key={index}
+                href={resource.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group block p-4 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 rounded-lg transition-all"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge variant="outline" className="text-xs capitalize border-white/20 text-gray-400">
+                        {resource.type}
+                      </Badge>
+                    </div>
+                    <h4 className="font-medium text-white group-hover:text-blue-400 transition-colors truncate">
+                      {resource.title}
+                    </h4>
+                    <p className="text-sm text-gray-400 mt-1 line-clamp-2">{resource.description}</p>
+                  </div>
+                  <ExternalLink className="h-4 w-4 text-gray-500 group-hover:text-blue-400 flex-shrink-0 transition-colors" />
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Video Recording Review */}
       {interview.video_playback_id && (

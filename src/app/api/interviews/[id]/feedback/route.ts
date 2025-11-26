@@ -139,6 +139,8 @@ export async function POST(
         strengths: feedback.strengths,
         areas_for_improvement: feedback.areas_for_improvement,
         detailed_feedback: feedback.detailed_feedback,
+        recommended_resources: feedback.recommended_resources,
+        next_steps: feedback.next_steps,
       })
       .select('id')
       .single()
@@ -250,34 +252,64 @@ function buildFeedbackPrompt(
   codeSubmission?: any
 ): string {
   const durationMinutes = Math.floor(durationSeconds / 60)
+
+  // Count actual substantive messages from candidate
+  const candidateMessages = transcript.filter(msg => msg.role === 'user')
+  const totalCandidateWords = candidateMessages.reduce((sum, msg) => sum + (msg.content?.split(/\s+/).length || 0), 0)
+
   const conversationHistory = transcript
     .map((msg) => `${msg.role === 'user' ? 'Candidate' : 'Interviewer'}: ${msg.content}`)
     .join('\n\n')
 
   const codeSection = codeSubmission?.code
     ? `\n**Candidate's Code Submission:**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n`
-    : '\n**Note:** No code was submitted by the candidate.\n'
+    : '\n**CRITICAL: No code was submitted by the candidate. This should result in very low technical scores (1-3/10).**\n'
 
-  const basePrompt = `You are an expert technical interviewer providing feedback on a ${interviewType.replace('_', ' ')} interview.
+  // Determine if this looks like a minimal/no-effort attempt
+  const isMinimalEffort = candidateMessages.length <= 2 || totalCandidateWords < 50
+
+  const basePrompt = `You are a STRICT but fair senior technical interviewer at a top tech company (Google/Meta/Amazon level). You are providing honest, accurate feedback on a ${interviewType.replace('_', ' ')} interview.
 
 **Interview Details:**
-- **Scenario:** ${scenario.title}
+- **Problem:** ${scenario.title}
 - **Description:** ${scenario.description}
 - **Difficulty:** ${scenario.difficulty}
-- **Duration:** ${durationMinutes} minutes
+- **Duration Used:** ${durationMinutes} minutes
 - **Type:** ${interviewType.replace('_', ' ')}
+- **Candidate Messages:** ${candidateMessages.length} messages, ~${totalCandidateWords} words total
 ${interviewType === 'coding' ? codeSection : ''}
+
 **Full Interview Transcript:**
 ${conversationHistory}
 
-**Your Task:**
-Provide comprehensive, constructive feedback on this interview performance. Be honest but encouraging. Highlight both strengths and areas for improvement.
+---
 
-**CRITICAL: Focus ONLY on the interview performance**
-- Evaluate how well they performed on THIS specific interview question
-- If they went off-topic (e.g., asking about unrelated subjects), note this as a negative point
-- If they didn't attempt the problem or asked inappropriate questions, reflect this in a low score
-- Base your feedback entirely on their technical performance and interview conduct
+## STRICT SCORING GUIDELINES - READ CAREFULLY
+
+You must be HONEST and ACCURATE. Do NOT inflate scores to be nice. Real interview feedback helps candidates improve.
+
+**Score Definitions (apply these strictly):**
+- **1-2/10:** Did not attempt the problem, off-topic, or completely wrong approach
+- **3-4/10:** Minimal effort, incomplete solution, major gaps in understanding
+- **5-6/10:** Partial solution, understood the problem but couldn't complete it
+- **7-8/10:** Good solution with minor issues, demonstrated solid understanding
+- **9-10/10:** Excellent, optimal or near-optimal solution, great communication
+
+${isMinimalEffort ? `
+**⚠️ WARNING: This appears to be a minimal-effort interview:**
+- Only ${candidateMessages.length} messages from candidate
+- Only ~${totalCandidateWords} total words spoken
+- This should be reflected in LOW scores (typically 1-4/10 range)
+- Do NOT give average scores (5-7) for minimal participation
+` : ''}
+
+**CRITICAL RULES:**
+1. If candidate did NOT write code or provide a solution → technical_accuracy should be 1-3/10
+2. If candidate went off-topic or didn't engage with the problem → overall_score should be 1-4/10
+3. If candidate only had brief exchanges without substance → problem_solving should be 1-4/10
+4. Do NOT default to middle scores (5-7) for incomplete work - be accurate
+5. A 2/10 is appropriate for someone who barely participated
+6. A 5/10 means they attempted but couldn't finish - this requires real effort shown
 
 **You must respond in this EXACT JSON format:**
 \`\`\`json
@@ -287,16 +319,25 @@ Provide comprehensive, constructive feedback on this interview performance. Be h
   "communication": <number 1-10>,
   "problem_solving": <number 1-10>,
   "strengths": [
-    "Specific strength 1",
-    "Specific strength 2",
-    "Specific strength 3"
+    "Be specific - cite exact things they did well, or say 'Showed up for the interview' if nothing else"
   ],
   "areas_for_improvement": [
-    "Specific area 1",
-    "Specific area 2",
-    "Specific area 3"
+    "Be specific and actionable - what exactly should they work on?"
   ],
-  "detailed_feedback": "# Overall Assessment\\n\\nProvide 2-3 paragraphs of detailed feedback here in markdown format. Include:\\n- Summary of performance\\n- Key strengths demonstrated\\n- Areas needing improvement\\n- Specific examples from the interview\\n- Actionable recommendations"
+  "detailed_feedback": "Markdown formatted feedback - be specific about what happened in THIS interview",
+  "recommended_resources": [
+    {
+      "type": "practice",
+      "title": "Resource title",
+      "url": "https://...",
+      "description": "Why this helps"
+    }
+  ],
+  "next_steps": [
+    "Specific actionable step 1",
+    "Specific actionable step 2",
+    "Specific actionable step 3"
+  ]
 }
 \`\`\`
 
@@ -307,53 +348,67 @@ Provide comprehensive, constructive feedback on this interview performance. Be h
     case 'system_design':
       return basePrompt + `
 **Evaluation Criteria for System Design:**
-1. **Requirements Gathering:** Did they ask clarifying questions about functional and non-functional requirements?
-2. **High-Level Design:** Did they create a clear system architecture?
-3. **Component Design:** Did they explain key components (databases, caches, load balancers, etc.)?
-4. **Scalability:** Did they discuss how to scale the system?
-5. **Trade-offs:** Did they explain trade-offs in their design decisions?
-6. **Failure Handling:** Did they consider failure scenarios and mitigation?
-7. **Communication:** Were they clear and structured in their explanation?
+1. **Requirements Gathering (0-2 points):** Did they ask ANY clarifying questions? If not, deduct heavily.
+2. **High-Level Design (0-2 points):** Did they sketch out components? No diagram/explanation = 0 points.
+3. **Depth (0-2 points):** Did they dive into at least one component in detail?
+4. **Scalability (0-2 points):** Did they discuss scale, bottlenecks, or optimizations?
+5. **Trade-offs (0-2 points):** Did they acknowledge any trade-offs in their design?
 
-Focus on their thought process, not perfect solutions. Real-world systems evolve.
+**Recommended Resources to Include (pick 2-4 relevant ones):**
+- "System Design Interview" by Alex Xu (Book)
+- https://github.com/donnemartin/system-design-primer - System Design Primer
+- https://www.youtube.com/@SystemDesignInterview - System Design Interview YouTube
+- https://bytebytego.com - ByteByteGo Newsletter
+- Specific YouTube videos for the system they were designing (e.g., "Design Instagram" videos)
 `
 
     case 'coding':
       return basePrompt + `
 **Evaluation Criteria for Coding:**
-1. **Problem Understanding:** Did they understand the problem before coding?
-2. **Solution Approach:** Did they explain their approach clearly?
-3. **Code Quality:** Was their code clean, readable, and well-structured?
-4. **Code Correctness:** Does their submitted code solve the problem? Review the actual code above.
-5. **Edge Cases:** Did they consider edge cases in their code?
-6. **Complexity Analysis:** Did they analyze time and space complexity?
-7. **Optimization:** Did they optimize their solution when prompted?
-8. **Testing:** Did they discuss how to test their solution?
-9. **Communication:** Did they think aloud and explain their decisions?
-10. **Interview Conduct:** Did they stay focused on the problem, or did they get distracted/ask off-topic questions?
+1. **Problem Understanding (0-2 points):** Did they restate the problem or ask clarifying questions?
+2. **Approach Discussion (0-2 points):** Did they explain their approach BEFORE coding?
+3. **Code Correctness (0-3 points):** Does the code actually work? Review what they wrote.
+4. **Code Quality (0-2 points):** Is it readable? Reasonable variable names?
+5. **Complexity Analysis (0-1 point):** Did they mention time/space complexity?
 
-**CRITICAL FOR CODING FEEDBACK:**
-- Review the actual code they wrote (shown above)
-- If they didn't write any code or very minimal code, this should be heavily reflected in technical_accuracy and problem_solving scores
-- If they asked to be taught unrelated topics (languages, off-topic questions), note this as poor interview conduct
-- Base technical_accuracy score on the correctness and completeness of their code
-- If they only wrote comments or a few lines, score accordingly (low scores 3-5/10)
-- If they have a working solution, even if not optimal, score fairly (6-8/10)
-- Be lenient on syntax errors but strict on logical thinking and problem-solving approach
+**IF NO CODE WAS SUBMITTED:**
+- technical_accuracy: 1-2/10 maximum
+- problem_solving: 1-3/10 maximum
+- This is a failing interview performance
+
+**Recommended Resources to Include (pick 3-5 relevant ones based on the problem):**
+- https://leetcode.com/problems/{similar-problem} - Similar LeetCode problems to practice
+- https://neetcode.io - NeetCode (structured problem-solving course)
+- https://www.algoexpert.io - AlgoExpert
+- "Cracking the Coding Interview" by Gayle McDowell (Book)
+- Specific topics: Arrays, Hash Maps, Two Pointers, Dynamic Programming, etc.
+- https://visualgo.net - VisuAlgo for understanding algorithms visually
+
+For this specific problem (${scenario.title}), recommend:
+- 2-3 similar LeetCode problems at same or easier difficulty
+- The specific data structure/algorithm topic they should study
+- A video explanation if available (NeetCode, Back To Back SWE, etc.)
 `
 
     case 'behavioral':
       return basePrompt + `
 **Evaluation Criteria for Behavioral:**
-1. **STAR Structure:** Did they follow Situation, Task, Action, Result format?
-2. **Specificity:** Were they specific with details, numbers, and outcomes?
-3. **Ownership:** Did they clearly explain their role vs team contributions?
-4. **Impact:** Did they quantify the impact of their actions?
-5. **Reflection:** Did they discuss lessons learned?
-6. **Authenticity:** Did the story feel genuine and detailed?
-7. **Communication:** Were they clear and engaging?
+1. **STAR Structure (0-3 points):** Did they clearly state Situation, Task, Action, Result?
+2. **Specificity (0-2 points):** Did they give specific details, metrics, outcomes?
+3. **Ownership (0-2 points):** Did they say "I" not just "we"? Was their role clear?
+4. **Impact (0-2 points):** Did they quantify results? Business impact?
+5. **Relevance (0-1 point):** Did the story actually answer the question asked?
 
-Look for concrete examples, not vague generalizations. "We" statements should be balanced with "I" statements.
+**IF THEY DIDN'T SHARE A STORY:**
+- communication: 1-3/10 maximum
+- This is not a passing behavioral response
+
+**Recommended Resources to Include:**
+- https://www.amazon.jobs/en/principles - Amazon Leadership Principles (great framework)
+- "The STAR Interview Method" - YouTube videos
+- https://www.levels.fyi/blog/behavioral-interview-prep.html - Behavioral Interview Guide
+- Practice with: "Tell me about a time when..." format
+- Record yourself answering and review
 `
 
     default:
@@ -372,6 +427,8 @@ function parseFeedbackResponse(feedbackText: string): {
   strengths: string[]
   areas_for_improvement: string[]
   detailed_feedback: string
+  recommended_resources: Array<{ type: string; title: string; url: string; description: string }>
+  next_steps: string[]
 } {
   try {
     // Extract JSON from markdown code blocks
@@ -381,25 +438,36 @@ function parseFeedbackResponse(feedbackText: string): {
     const parsed = JSON.parse(jsonText)
 
     return {
-      overall_score: Math.max(1, Math.min(10, parsed.overall_score || 7)),
-      technical_accuracy: Math.max(1, Math.min(10, parsed.technical_accuracy || 7)),
-      communication: Math.max(1, Math.min(10, parsed.communication || 7)),
-      problem_solving: Math.max(1, Math.min(10, parsed.problem_solving || 7)),
-      strengths: parsed.strengths || ['Showed good engagement', 'Communicated clearly', 'Demonstrated effort'],
-      areas_for_improvement: parsed.areas_for_improvement || ['More practice needed', 'Focus on fundamentals', 'Improve time management'],
-      detailed_feedback: parsed.detailed_feedback || '# Feedback\n\nThank you for completing the interview. Keep practicing!',
+      overall_score: Math.max(1, Math.min(10, parsed.overall_score || 3)),
+      technical_accuracy: Math.max(1, Math.min(10, parsed.technical_accuracy || 3)),
+      communication: Math.max(1, Math.min(10, parsed.communication || 3)),
+      problem_solving: Math.max(1, Math.min(10, parsed.problem_solving || 3)),
+      strengths: parsed.strengths || ['Completed the interview session'],
+      areas_for_improvement: parsed.areas_for_improvement || ['Need to attempt the problem', 'Practice coding fundamentals', 'Engage more with the interviewer'],
+      detailed_feedback: parsed.detailed_feedback || '# Feedback\n\nThe interview was not completed successfully. Please review the resources below and try again.',
+      recommended_resources: parsed.recommended_resources || [
+        { type: 'course', title: 'NeetCode - Coding Interview Prep', url: 'https://neetcode.io', description: 'Structured approach to learning algorithms' },
+        { type: 'practice', title: 'LeetCode Easy Problems', url: 'https://leetcode.com/problemset/?difficulty=EASY', description: 'Start with easy problems to build confidence' },
+      ],
+      next_steps: parsed.next_steps || ['Review the problem and understand what was being asked', 'Practice similar problems on LeetCode', 'Watch solution explanations on YouTube'],
     }
   } catch (error) {
     console.error('Failed to parse feedback:', error)
-    // Return default feedback if parsing fails
+    // Return low default scores if parsing fails - don't assume good performance
     return {
-      overall_score: 7,
-      technical_accuracy: 7,
-      communication: 7,
-      problem_solving: 7,
-      strengths: ['Showed engagement', 'Communicated clearly', 'Demonstrated problem-solving'],
-      areas_for_improvement: ['Continue practicing', 'Focus on fundamentals', 'Work on time management'],
-      detailed_feedback: '# Interview Feedback\n\nThank you for completing the interview. You demonstrated good engagement and communication throughout the session. Continue practicing to improve your technical skills and problem-solving approach.',
+      overall_score: 3,
+      technical_accuracy: 3,
+      communication: 3,
+      problem_solving: 3,
+      strengths: ['Attended the interview session'],
+      areas_for_improvement: ['Complete the coding problem', 'Communicate your thought process', 'Practice problem-solving skills'],
+      detailed_feedback: '# Interview Feedback\n\nWe were unable to fully analyze your interview performance. Based on the available information, we recommend focusing on the fundamentals and practicing more problems before your next attempt.',
+      recommended_resources: [
+        { type: 'course', title: 'NeetCode - Coding Interview Prep', url: 'https://neetcode.io', description: 'Structured approach to learning algorithms' },
+        { type: 'practice', title: 'LeetCode Easy Problems', url: 'https://leetcode.com/problemset/?difficulty=EASY', description: 'Start with easy problems to build confidence' },
+        { type: 'book', title: 'Cracking the Coding Interview', url: 'https://www.crackingthecodinginterview.com/', description: 'Comprehensive interview preparation guide' },
+      ],
+      next_steps: ['Start with easy problems on LeetCode', 'Learn one data structure per week', 'Practice explaining your thought process out loud'],
     }
   }
 }
