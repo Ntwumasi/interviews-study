@@ -214,18 +214,14 @@ export function InterviewRoom({
       <div className="flex-1 overflow-hidden flex">
         {/* Left: Code Editor + Collapsible Output */}
         <div className="flex-1 min-w-0 flex flex-col border-r border-white/[0.08]">
-          {/* Code Editor */}
+          {/* Workspace - Different for each interview type */}
           <div className="flex-1 min-h-0">
-            {interviewType === 'coding' || interviewType === 'system_design' ? (
-              <InterviewWorkspace
-                interviewId={interviewId}
-                interviewType={interviewType}
-                onOutputChange={setCodeOutput}
-                onRunningChange={setIsRunningCode}
-              />
-            ) : (
-              <div className="h-full bg-[#0f0f0f]" />
-            )}
+            <InterviewWorkspace
+              interviewId={interviewId}
+              interviewType={interviewType}
+              onOutputChange={setCodeOutput}
+              onRunningChange={setIsRunningCode}
+            />
           </div>
 
           {/* Collapsible Output Panel - Only for coding */}

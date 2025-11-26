@@ -1,7 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { Pencil, Save } from 'lucide-react'
+import { useEffect, useState, useRef } from 'react'
 import '@excalidraw/excalidraw/index.css'
 
 interface DiagramWorkspaceProps {
@@ -12,27 +11,8 @@ export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
   const [ExcalidrawComponent, setExcalidrawComponent] = useState<any>(null)
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)
-  const [lastSaved, setLastSaved] = useState<Date | null>(null)
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark')
-
-  // Listen for theme changes
-  useEffect(() => {
-    const updateTheme = () => {
-      const isDark = document.documentElement.classList.contains('dark')
-      setTheme(isDark ? 'dark' : 'light')
-    }
-
-    updateTheme()
-
-    // Listen for theme changes
-    const observer = new MutationObserver(updateTheme)
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ['class'],
-    })
-
-    return () => observer.disconnect()
-  }, [])
+  const [elementCount, setElementCount] = useState(0)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Load Excalidraw dynamically
   useEffect(() => {
@@ -52,6 +32,7 @@ export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
           const data = await response.json()
           if (data.diagram && data.diagram.elements) {
             excalidrawAPI.updateScene(data.diagram)
+            setElementCount(data.diagram.elements.length)
             console.log('[Diagram] Loaded saved diagram')
           }
         }
@@ -63,75 +44,109 @@ export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
     loadDiagram()
   }, [excalidrawAPI, interviewId])
 
-  // Auto-save diagram
+  // Auto-save diagram with debouncing
   const handleChange = async (elements: any, appState: any) => {
+    setElementCount(elements?.length || 0)
+
     if (!elements || elements.length === 0) return
 
-    setIsSaving(true)
-    try {
-      await fetch(`/api/interviews/${interviewId}/diagram`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          diagram: { elements, appState },
-        }),
-      })
-      setLastSaved(new Date())
-    } catch (error) {
-      console.error('[Diagram] Failed to save:', error)
-    } finally {
-      setIsSaving(false)
+    // Clear previous timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
     }
+
+    // Debounce save
+    saveTimeoutRef.current = setTimeout(async () => {
+      setIsSaving(true)
+      try {
+        await fetch(`/api/interviews/${interviewId}/diagram`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            diagram: { elements, appState },
+          }),
+        })
+      } catch (error) {
+        console.error('[Diagram] Failed to save:', error)
+      } finally {
+        setIsSaving(false)
+      }
+    }, 1000)
   }
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [])
+
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0A] overflow-hidden">
-      {/* Header */}
-      <div className="flex-shrink-0 border-b border-white/10 px-4 py-3 bg-white/5">
-        <div className="flex items-center justify-between">
+    <div className="h-full flex flex-col bg-[#1a1a1a] overflow-hidden relative">
+      {/* Minimal Toolbar */}
+      <div className="flex-shrink-0 h-10 px-3 flex items-center justify-between border-b border-white/[0.06] bg-[#0f0f0f]">
+        <div className="flex items-center gap-3">
+          <span className="text-[13px] text-gray-300 font-medium">System Design</span>
           <div className="flex items-center gap-2">
-            <Pencil className="h-4 w-4 text-blue-400" />
-            <h3 className="text-sm font-semibold text-white">System Design Diagram</h3>
+            <span className="text-[11px] text-gray-500">
+              {elementCount} {elementCount === 1 ? 'element' : 'elements'}
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-xs text-gray-400">
-            {isSaving ? (
-              <>
-                <Save className="h-3 w-3 animate-pulse" />
-                <span>Saving...</span>
-              </>
-            ) : lastSaved ? (
-              <>
-                <Save className="h-3 w-3" />
-                <span>Saved {lastSaved.toLocaleTimeString()}</span>
-              </>
-            ) : (
-              <span>Draw your architecture</span>
-            )}
-          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          {isSaving && (
+            <span className="text-[11px] text-gray-500 animate-pulse">Saving...</span>
+          )}
         </div>
       </div>
 
-      {/* Excalidraw Canvas */}
-      <div className="flex-1 overflow-hidden" style={{ height: 'calc(100vh - 180px)' }}>
+      {/* Excalidraw Canvas - Full Height */}
+      <div className="flex-1 overflow-hidden">
         {ExcalidrawComponent ? (
           <ExcalidrawComponent
             excalidrawAPI={(api: any) => setExcalidrawAPI(api)}
             onChange={handleChange}
-            theme={theme}
+            theme="dark"
             initialData={{
               appState: {
-                viewBackgroundColor: theme === 'dark' ? '#121212' : '#ffffff',
+                viewBackgroundColor: '#1a1a1a',
+                currentItemFontFamily: 1,
+                gridSize: null,
+              },
+            }}
+            UIOptions={{
+              canvasActions: {
+                changeViewBackgroundColor: false,
+                clearCanvas: true,
+                export: false,
+                loadScene: false,
+                saveToActiveFile: false,
+                toggleTheme: false,
+                saveAsImage: false,
               },
             }}
           />
         ) : (
-          <div className="h-full w-full flex items-center justify-center bg-[#121212]">
+          <div className="h-full w-full flex items-center justify-center bg-[#1a1a1a]">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-12 w-12 border-4 border-blue-500 border-t-transparent mx-auto mb-4"></div>
-              <p className="text-gray-400">Loading canvas...</p>
+              <div className="w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+              <p className="text-[13px] text-gray-500">Loading canvas...</p>
             </div>
           </div>
         )}
+      </div>
+
+      {/* Quick Tips Overlay - Bottom Left */}
+      <div className="absolute bottom-4 left-4 max-w-xs">
+        <div className="bg-black/80 backdrop-blur-sm rounded-lg border border-white/[0.08] p-3 text-[11px] text-gray-400 space-y-1">
+          <p className="text-gray-300 font-medium mb-1.5">Quick Tips</p>
+          <p>• Start with high-level components (Client, Server, DB)</p>
+          <p>• Use arrows to show data flow direction</p>
+          <p>• Label connections with protocols (HTTP, WebSocket)</p>
+          <p>• Press <kbd className="px-1 py-0.5 bg-white/10 rounded text-[10px]">R</kbd> for rectangle, <kbd className="px-1 py-0.5 bg-white/10 rounded text-[10px]">A</kbd> for arrow</p>
+        </div>
       </div>
     </div>
   )

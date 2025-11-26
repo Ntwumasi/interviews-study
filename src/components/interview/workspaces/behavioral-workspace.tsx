@@ -1,9 +1,6 @@
 'use client'
 
-import { useState } from 'react'
-import { MessageSquare, Save } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
+import { useState, useEffect } from 'react'
 
 interface BehavioralWorkspaceProps {
   interviewId: string
@@ -16,6 +13,37 @@ interface StarResponse {
   result: string
 }
 
+const STAR_SECTIONS = [
+  {
+    key: 'situation' as const,
+    label: 'S',
+    title: 'Situation',
+    hint: 'Set the scene - describe the context',
+    placeholder: 'Describe the situation you were in. What was the context? When and where did this happen?',
+  },
+  {
+    key: 'task' as const,
+    label: 'T',
+    title: 'Task',
+    hint: 'Your responsibility or goal',
+    placeholder: 'What was your specific responsibility? What were you trying to achieve?',
+  },
+  {
+    key: 'action' as const,
+    label: 'A',
+    title: 'Action',
+    hint: 'The specific steps you took',
+    placeholder: 'What specific actions did YOU take? Focus on "I" not "we". Be detailed about your approach.',
+  },
+  {
+    key: 'result' as const,
+    label: 'R',
+    title: 'Result',
+    hint: 'Outcomes and learnings',
+    placeholder: 'What was the outcome? Quantify if possible (%, $, time saved). What did you learn?',
+  },
+]
+
 export function BehavioralWorkspace({ interviewId }: BehavioralWorkspaceProps) {
   const [starResponse, setStarResponse] = useState<StarResponse>({
     situation: '',
@@ -24,114 +52,152 @@ export function BehavioralWorkspace({ interviewId }: BehavioralWorkspaceProps) {
     result: '',
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [activeSection, setActiveSection] = useState<keyof StarResponse | null>(null)
 
-  const handleSave = async () => {
-    setIsSaving(true)
-    try {
-      // TODO: Save STAR response to database
-      console.log('Saving STAR response:', starResponse)
-      await new Promise((resolve) => setTimeout(resolve, 500)) // Simulate save
-    } catch (error) {
-      console.error('Failed to save STAR response:', error)
-    } finally {
-      setIsSaving(false)
-    }
-  }
+  // Auto-save with debouncing
+  useEffect(() => {
+    const hasContent = Object.values(starResponse).some(v => v.trim().length > 0)
+    if (!hasContent) return
+
+    const saveTimer = setTimeout(async () => {
+      setIsSaving(true)
+      try {
+        // TODO: Implement actual save to database
+        console.log('[Behavioral] Auto-saving STAR response:', starResponse)
+        await new Promise((resolve) => setTimeout(resolve, 300))
+      } catch (error) {
+        console.error('[Behavioral] Failed to save:', error)
+      } finally {
+        setIsSaving(false)
+      }
+    }, 1000)
+
+    return () => clearTimeout(saveTimer)
+  }, [starResponse, interviewId])
 
   const updateField = (field: keyof StarResponse, value: string) => {
     setStarResponse((prev) => ({ ...prev, [field]: value }))
   }
 
+  // Calculate completion for each section
+  const getCompletionStatus = (key: keyof StarResponse) => {
+    const value = starResponse[key]
+    if (!value || value.trim().length === 0) return 'empty'
+    if (value.trim().length < 50) return 'partial'
+    return 'complete'
+  }
+
   return (
-    <div className="h-full flex flex-col bg-[#0A0A0A]">
-      <div className="border-b border-white/10 px-4 py-3 bg-white/5">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <MessageSquare className="h-4 w-4 text-purple-400" />
-            <h3 className="text-sm font-semibold text-white">STAR Method Notes</h3>
+    <div className="h-full flex flex-col bg-[#1a1a1a]">
+      {/* Minimal Toolbar */}
+      <div className="flex-shrink-0 h-10 px-3 flex items-center justify-between border-b border-white/[0.06] bg-[#0f0f0f]">
+        <div className="flex items-center gap-3">
+          <span className="text-[13px] text-gray-300 font-medium">STAR Method</span>
+          <div className="flex items-center gap-1">
+            {STAR_SECTIONS.map((section) => {
+              const status = getCompletionStatus(section.key)
+              return (
+                <div
+                  key={section.key}
+                  className={`w-6 h-6 rounded flex items-center justify-center text-[11px] font-semibold transition-colors ${
+                    status === 'complete'
+                      ? 'bg-green-500/20 text-green-400'
+                      : status === 'partial'
+                      ? 'bg-amber-500/20 text-amber-400'
+                      : 'bg-white/[0.06] text-gray-500'
+                  }`}
+                  title={`${section.title}: ${status}`}
+                >
+                  {section.label}
+                </div>
+              )
+            })}
           </div>
-          <Button
-            size="sm"
-            onClick={handleSave}
-            disabled={isSaving}
-            className="bg-purple-600 hover:bg-purple-700"
-          >
-            <Save className="h-4 w-4 mr-1" />
-            {isSaving ? 'Saving...' : 'Save Notes'}
-          </Button>
         </div>
-        <p className="text-xs text-gray-400 mt-1">
-          Structure your response using the STAR framework
-        </p>
+        <div className="flex items-center gap-2">
+          {isSaving && (
+            <span className="text-[11px] text-gray-500 animate-pulse">Saving...</span>
+          )}
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-6 space-y-4">
-        {/* Situation */}
-        <div className="space-y-2">
-          <Label htmlFor="situation" className="text-sm font-semibold text-white">
-            Situation
-          </Label>
-          <p className="text-xs text-gray-400">
-            Describe the context and background of the situation
-          </p>
-          <textarea
-            id="situation"
-            value={starResponse.situation}
-            onChange={(e) => updateField('situation', e.target.value)}
-            placeholder="What was the context? Where did this happen?"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none min-h-[100px]"
-          />
+      {/* STAR Sections */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="p-4 space-y-3">
+          {STAR_SECTIONS.map((section, index) => {
+            const status = getCompletionStatus(section.key)
+            const isActive = activeSection === section.key
+
+            return (
+              <div
+                key={section.key}
+                className={`rounded-lg border transition-all ${
+                  isActive
+                    ? 'border-purple-500/50 bg-purple-500/5'
+                    : 'border-white/[0.06] bg-white/[0.02]'
+                }`}
+              >
+                {/* Section Header */}
+                <div className="flex items-center gap-3 px-4 py-3 border-b border-white/[0.04]">
+                  <div
+                    className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
+                      status === 'complete'
+                        ? 'bg-green-500/20 text-green-400'
+                        : status === 'partial'
+                        ? 'bg-amber-500/20 text-amber-400'
+                        : 'bg-purple-500/20 text-purple-400'
+                    }`}
+                  >
+                    {section.label}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-[14px] font-medium text-white">{section.title}</h3>
+                    <p className="text-[12px] text-gray-500">{section.hint}</p>
+                  </div>
+                  {status === 'complete' && (
+                    <span className="text-[11px] text-green-400 bg-green-500/10 px-2 py-0.5 rounded">
+                      Complete
+                    </span>
+                  )}
+                </div>
+
+                {/* Textarea */}
+                <textarea
+                  value={starResponse[section.key]}
+                  onChange={(e) => updateField(section.key, e.target.value)}
+                  onFocus={() => setActiveSection(section.key)}
+                  onBlur={() => setActiveSection(null)}
+                  placeholder={section.placeholder}
+                  className="w-full bg-transparent px-4 py-3 text-[14px] text-gray-200 placeholder-gray-600 focus:outline-none resize-none min-h-[100px] leading-relaxed"
+                />
+              </div>
+            )
+          })}
         </div>
 
-        {/* Task */}
-        <div className="space-y-2">
-          <Label htmlFor="task" className="text-sm font-semibold text-white">
-            Task
-          </Label>
-          <p className="text-xs text-gray-400">
-            Explain what your responsibility or goal was
-          </p>
-          <textarea
-            id="task"
-            value={starResponse.task}
-            onChange={(e) => updateField('task', e.target.value)}
-            placeholder="What were you trying to achieve? What was your role?"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none min-h-[100px]"
-          />
-        </div>
-
-        {/* Action */}
-        <div className="space-y-2">
-          <Label htmlFor="action" className="text-sm font-semibold text-white">
-            Action
-          </Label>
-          <p className="text-xs text-gray-400">
-            Detail the specific steps you took to address the task
-          </p>
-          <textarea
-            id="action"
-            value={starResponse.action}
-            onChange={(e) => updateField('action', e.target.value)}
-            placeholder="What specific actions did you take? How did you approach it?"
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none min-h-[120px]"
-          />
-        </div>
-
-        {/* Result */}
-        <div className="space-y-2">
-          <Label htmlFor="result" className="text-sm font-semibold text-white">
-            Result
-          </Label>
-          <p className="text-xs text-gray-400">
-            Share the outcomes and what you learned
-          </p>
-          <textarea
-            id="result"
-            value={starResponse.result}
-            onChange={(e) => updateField('result', e.target.value)}
-            placeholder="What was the outcome? What did you learn? Include metrics if possible."
-            className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 resize-none min-h-[100px]"
-          />
+        {/* Tips Section */}
+        <div className="px-4 pb-6">
+          <div className="rounded-lg border border-white/[0.06] bg-white/[0.02] p-4">
+            <h4 className="text-[13px] font-medium text-gray-400 mb-2">Tips for Strong Responses</h4>
+            <ul className="space-y-1.5 text-[12px] text-gray-500">
+              <li className="flex items-start gap-2">
+                <span className="text-purple-400 mt-0.5">•</span>
+                <span>Use "I" instead of "we" to highlight your specific contributions</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-400 mt-0.5">•</span>
+                <span>Include specific metrics and numbers where possible</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-400 mt-0.5">•</span>
+                <span>Keep each section concise - aim for 2-3 sentences each</span>
+              </li>
+              <li className="flex items-start gap-2">
+                <span className="text-purple-400 mt-0.5">•</span>
+                <span>Focus on recent examples (last 2-3 years)</span>
+              </li>
+            </ul>
+          </div>
         </div>
       </div>
     </div>
