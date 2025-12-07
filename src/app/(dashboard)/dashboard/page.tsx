@@ -5,6 +5,7 @@ import { InterviewDifficultyButton } from '@/components/dashboard/interview-diff
 import { PastInterviewsSection } from '@/components/dashboard/past-interviews-section'
 import { ProgressChart } from '@/components/dashboard/progress-chart'
 import { CompanyTracks } from '@/components/dashboard/company-tracks'
+import { JobRoadmap } from '@/components/dashboard/job-roadmap'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const INTERVIEW_TYPES = [
@@ -179,6 +180,11 @@ export default async function DashboardPage() {
 
         {/* Progress Chart */}
         <ProgressChart interviews={pastInterviews} />
+
+        {/* Job URL Learning Roadmap */}
+        <div className="hidden md:block mt-8">
+          <JobRoadmap />
+        </div>
 
         {/* Company-Specific Interview Tracks */}
         <div className="hidden md:block mt-8">
