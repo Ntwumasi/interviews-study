@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { ClerkProvider } from '@clerk/nextjs'
 import { PostHogProvider } from '@/components/providers/posthog-provider'
 import { EnvCheck } from '@/components/debug/env-check'
+import { Toaster } from 'sonner'
 import "./globals.css";
 
 const inter = Inter({
@@ -96,6 +97,17 @@ export default function RootLayout({
           <PostHogProvider>
             {children}
             <EnvCheck />
+            <Toaster
+              position="top-center"
+              theme="dark"
+              toastOptions={{
+                style: {
+                  background: '#1a1a1a',
+                  border: '1px solid rgba(255,255,255,0.08)',
+                  color: '#fff',
+                },
+              }}
+            />
           </PostHogProvider>
         </body>
       </html>

@@ -1,9 +1,10 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { TranscriptMessage } from '@/types'
-import { Send, Volume2, VolumeX, Mic, Bot } from 'lucide-react'
+import { Send, Volume2, VolumeX, Mic, Bot, Play } from 'lucide-react'
 import ReactMarkdown from 'react-markdown'
+import { toast } from 'sonner'
 
 interface InterviewChatProps {
   transcript: TranscriptMessage[]
@@ -18,11 +19,14 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [isListening, setIsListening] = useState(false)
   const [speechSupported, setSpeechSupported] = useState(false)
+  const [audioBlocked, setAudioBlocked] = useState(false)
+  const [pendingAudioText, setPendingAudioText] = useState<string | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const lastMessageCountRef = useRef(0)
   const recognitionRef = useRef<any>(null)
+  const hasShownAudioBlockedToast = useRef(false)
 
   // Initialize speech recognition
   useEffect(() => {
@@ -85,7 +89,7 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
     lastMessageCountRef.current = transcript.length
   }, [transcript, voiceEnabled])
 
-  const playVoice = async (text: string) => {
+  const playVoice = useCallback(async (text: string, isRetry: boolean = false) => {
     try {
       setIsSpeaking(true)
 
@@ -113,6 +117,8 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
 
       audio.onended = () => {
         setIsSpeaking(false)
+        setAudioBlocked(false)
+        setPendingAudioText(null)
         URL.revokeObjectURL(audioUrl)
       }
 
@@ -126,22 +132,36 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
       const playPromise = audio.play()
 
       if (playPromise !== undefined) {
-        playPromise.catch((error) => {
-          console.warn('[Voice] Autoplay blocked. User interaction required:', error.message)
-          setIsSpeaking(false)
-          URL.revokeObjectURL(audioUrl)
+        playPromise
+          .then(() => {
+            // Audio started playing successfully
+            setAudioBlocked(false)
+            setPendingAudioText(null)
+          })
+          .catch((error) => {
+            console.warn('[Voice] Autoplay blocked:', error.message)
+            setIsSpeaking(false)
+            URL.revokeObjectURL(audioUrl)
 
-          // Show user-friendly message
-          if (error.name === 'NotAllowedError') {
-            console.log('[Voice] TIP: Click anywhere on the page, then send another message')
-          }
-        })
+            // Only show toast once per session
+            if (error.name === 'NotAllowedError' && !hasShownAudioBlockedToast.current) {
+              hasShownAudioBlockedToast.current = true
+              setAudioBlocked(true)
+              setPendingAudioText(text)
+
+              toast('Voice is ready', {
+                description: 'Click the play button to hear the AI interviewer',
+                duration: 5000,
+                icon: '🔊',
+              })
+            }
+          })
       }
     } catch (error) {
       console.error('[Voice] Error playing audio:', error)
       setIsSpeaking(false)
     }
-  }
+  }, [])
 
   const toggleVoice = () => {
     if (voiceEnabled && audioRef.current) {
@@ -150,6 +170,14 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
     }
     setVoiceEnabled(!voiceEnabled)
   }
+
+  // Manual play for when autoplay is blocked
+  const handleManualPlay = useCallback(() => {
+    if (pendingAudioText) {
+      setAudioBlocked(false)
+      playVoice(pendingAudioText, true)
+    }
+  }, [pendingAudioText, playVoice])
 
   const toggleMicrophone = () => {
     if (!speechSupported || !recognitionRef.current) {
@@ -272,18 +300,31 @@ export function InterviewChat({ transcript, onSendMessage, isAISpeaking = false 
 
           {/* Right side controls */}
           <div className="absolute right-2 bottom-2 flex items-center gap-1">
+            {/* Play button when audio is blocked */}
+            {audioBlocked && pendingAudioText && (
+              <button
+                type="button"
+                onClick={handleManualPlay}
+                className="h-8 px-3 flex items-center gap-1.5 rounded-lg bg-green-600 hover:bg-green-500 text-white transition-colors animate-pulse"
+                title="Play AI voice"
+              >
+                <Play className="h-3.5 w-3.5 fill-current" />
+                <span className="text-[12px] font-medium">Play</span>
+              </button>
+            )}
+
             {/* Voice toggle */}
             <button
               type="button"
               onClick={toggleVoice}
               className={`h-8 w-8 flex items-center justify-center rounded-lg transition-colors ${
                 voiceEnabled
-                  ? 'text-blue-400 hover:bg-blue-500/10'
+                  ? isSpeaking ? 'text-green-400 bg-green-500/10' : 'text-blue-400 hover:bg-blue-500/10'
                   : 'text-gray-500 hover:bg-white/5'
               }`}
-              title={voiceEnabled ? 'Mute AI voice' : 'Unmute AI voice'}
+              title={voiceEnabled ? (isSpeaking ? 'Speaking...' : 'Mute AI voice') : 'Unmute AI voice'}
             >
-              {voiceEnabled ? <Volume2 className="h-4 w-4" /> : <VolumeX className="h-4 w-4" />}
+              {voiceEnabled ? <Volume2 className={`h-4 w-4 ${isSpeaking ? 'animate-pulse' : ''}`} /> : <VolumeX className="h-4 w-4" />}
             </button>
 
             {/* Mic / Send button */}

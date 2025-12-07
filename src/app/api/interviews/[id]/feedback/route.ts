@@ -98,7 +98,8 @@ export async function POST(
       interview.scenario,
       interview.transcript,
       interview.duration_seconds,
-      interview.code_submission
+      interview.code_submission,
+      interview.star_responses
     )
 
     // 4. Call Claude API for feedback generation
@@ -249,7 +250,8 @@ function buildFeedbackPrompt(
   scenario: any,
   transcript: any[],
   durationSeconds: number,
-  codeSubmission?: any
+  codeSubmission?: any,
+  starResponses?: any
 ): string {
   const durationMinutes = Math.floor(durationSeconds / 60)
 
@@ -265,6 +267,16 @@ function buildFeedbackPrompt(
     ? `\n**Candidate's Code Submission:**\n\`\`\`${codeSubmission.language}\n${codeSubmission.code}\n\`\`\`\n`
     : '\n**CRITICAL: No code was submitted by the candidate. This should result in very low technical scores (1-3/10).**\n'
 
+  // Format STAR responses for behavioral interviews
+  const starSection = starResponses
+    ? `\n**Candidate's STAR Response Notes:**
+- **Situation:** ${starResponses.situation || '(not provided)'}
+- **Task:** ${starResponses.task || '(not provided)'}
+- **Action:** ${starResponses.action || '(not provided)'}
+- **Result:** ${starResponses.result || '(not provided)'}
+`
+    : '\n**Note:** Candidate did not use the STAR notes feature.\n'
+
   // Determine if this looks like a minimal/no-effort attempt
   const isMinimalEffort = candidateMessages.length <= 2 || totalCandidateWords < 50
 
@@ -277,7 +289,7 @@ function buildFeedbackPrompt(
 - **Duration Used:** ${durationMinutes} minutes
 - **Type:** ${interviewType.replace('_', ' ')}
 - **Candidate Messages:** ${candidateMessages.length} messages, ~${totalCandidateWords} words total
-${interviewType === 'coding' ? codeSection : ''}
+${interviewType === 'coding' ? codeSection : ''}${interviewType === 'behavioral' ? starSection : ''}
 
 **Full Interview Transcript:**
 ${conversationHistory}

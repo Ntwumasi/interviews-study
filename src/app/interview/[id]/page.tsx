@@ -1,6 +1,7 @@
 import { Suspense } from 'react'
 import { auth } from '@clerk/nextjs/server'
 import { redirect } from 'next/navigation'
+import { headers } from 'next/headers'
 import { supabaseAdmin } from '@/lib/supabase'
 import { Interview, Scenario } from '@/types'
 import { InterviewRoom } from '@/components/interview/interview-room'
@@ -66,6 +67,15 @@ async function getInterview(interviewId: string, userId: string) {
 }
 
 export default async function InterviewPage({ params }: InterviewPageProps) {
+  // Check for mobile devices
+  const headersList = await headers()
+  const userAgent = headersList.get('user-agent') || ''
+  const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+
+  if (isMobile) {
+    redirect('/dashboard?mobile=blocked')
+  }
+
   const { userId } = await auth()
 
   if (!userId) {

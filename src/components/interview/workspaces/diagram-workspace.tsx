@@ -2,12 +2,14 @@
 
 import { useEffect, useState, useRef } from 'react'
 import '@excalidraw/excalidraw/index.css'
+import { Scenario } from '@/types'
 
 interface DiagramWorkspaceProps {
   interviewId: string
+  scenario: Scenario
 }
 
-export function DiagramWorkspace({ interviewId }: DiagramWorkspaceProps) {
+export function DiagramWorkspace({ interviewId, scenario }: DiagramWorkspaceProps) {
   const [ExcalidrawComponent, setExcalidrawComponent] = useState<any>(null)
   const [excalidrawAPI, setExcalidrawAPI] = useState<any>(null)
   const [isSaving, setIsSaving] = useState(false)

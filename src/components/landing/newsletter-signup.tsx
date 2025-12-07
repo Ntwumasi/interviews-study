@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { CheckCircle2, Mail } from 'lucide-react'
+import { CheckCircle2 } from 'lucide-react'
 import { ANALYTICS_EVENTS, trackEvent, NewsletterSignupProps } from '@/types/analytics'
 
 export function NewsletterSignup() {
@@ -57,47 +57,43 @@ export function NewsletterSignup() {
   }
 
   return (
-    <section className="container mx-auto px-4 sm:px-6 py-12 sm:py-16 md:py-20">
-      <div className="max-w-2xl mx-auto">
-        <div className="bg-white/5 backdrop-blur-sm rounded-2xl sm:rounded-3xl p-6 sm:p-8 md:p-10 lg:p-12 border border-white/10 text-center">
-          <div className="inline-flex items-center justify-center w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 bg-blue-500/10 rounded-full mb-4 sm:mb-5 md:mb-6">
-            <Mail className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-400" />
-          </div>
-
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-3 sm:mb-4">
-            Stay Updated
+    <section className="py-20 md:py-24">
+      <div className="container mx-auto px-6">
+        <div className="max-w-xl mx-auto text-center">
+          <h2 className="text-2xl md:text-3xl font-bold text-white mb-3 tracking-tight">
+            Get interview tips weekly
           </h2>
-          <p className="text-gray-300 text-sm sm:text-base md:text-lg mb-6 sm:mb-7 md:mb-8 px-2">
-            Get interview tips, new scenarios, and product updates delivered weekly.
+          <p className="text-white/50 text-sm md:text-base mb-8">
+            Join 5,000+ engineers. New scenarios, tips, and product updates.
           </p>
 
           {isSubmitted ? (
-            <div className="flex items-center justify-center gap-2 sm:gap-3 text-green-400 bg-green-500/10 rounded-lg py-3 sm:py-4 px-4 sm:px-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-              <span className="font-medium text-sm sm:text-base">Thanks for subscribing! Check your inbox.</span>
+            <div className="flex items-center justify-center gap-2 text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full py-3 px-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+              <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+              <span className="font-medium text-sm">You&apos;re in. Check your inbox.</span>
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
               <Input
                 type="email"
-                placeholder="Enter your email"
+                placeholder="you@company.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
-                className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-gray-400 focus:border-blue-400 focus:ring-blue-400/20 h-11 sm:h-12 text-sm sm:text-base"
+                className="flex-1 bg-white/5 border-white/10 text-white placeholder:text-white/30 focus:border-white/30 focus:ring-0 h-12 rounded-full px-5 text-sm"
               />
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-blue-500 hover:bg-blue-600 text-white px-6 sm:px-8 h-11 sm:h-12 whitespace-nowrap text-sm sm:text-base"
+                className="bg-white text-black hover:bg-white/90 h-12 px-6 rounded-full font-semibold text-sm"
               >
                 {isLoading ? 'Subscribing...' : 'Subscribe'}
               </Button>
             </form>
           )}
 
-          <p className="text-gray-500 text-xs sm:text-sm mt-3 sm:mt-4">
+          <p className="text-white/30 text-xs mt-4">
             No spam. Unsubscribe anytime.
           </p>
         </div>

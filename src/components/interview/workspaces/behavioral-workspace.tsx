@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Scenario } from '@/types'
 
 interface BehavioralWorkspaceProps {
   interviewId: string
+  scenario: Scenario
 }
 
 interface StarResponse {
@@ -44,7 +46,7 @@ const STAR_SECTIONS = [
   },
 ]
 
-export function BehavioralWorkspace({ interviewId }: BehavioralWorkspaceProps) {
+export function BehavioralWorkspace({ interviewId, scenario }: BehavioralWorkspaceProps) {
   const [starResponse, setStarResponse] = useState<StarResponse>({
     situation: '',
     task: '',
@@ -52,19 +54,46 @@ export function BehavioralWorkspace({ interviewId }: BehavioralWorkspaceProps) {
     result: '',
   })
   const [isSaving, setIsSaving] = useState(false)
+  const [isLoaded, setIsLoaded] = useState(false)
   const [activeSection, setActiveSection] = useState<keyof StarResponse | null>(null)
+
+  // Load saved STAR responses on mount
+  useEffect(() => {
+    const loadStarResponse = async () => {
+      try {
+        const response = await fetch(`/api/interviews/${interviewId}/star`)
+        if (response.ok) {
+          const data = await response.json()
+          if (data.starResponse) {
+            setStarResponse(data.starResponse)
+          }
+        }
+      } catch (error) {
+        console.error('[Behavioral] Failed to load STAR response:', error)
+      } finally {
+        setIsLoaded(true)
+      }
+    }
+
+    loadStarResponse()
+  }, [interviewId])
 
   // Auto-save with debouncing
   useEffect(() => {
+    // Don't save until we've loaded existing data
+    if (!isLoaded) return
+
     const hasContent = Object.values(starResponse).some(v => v.trim().length > 0)
     if (!hasContent) return
 
     const saveTimer = setTimeout(async () => {
       setIsSaving(true)
       try {
-        // TODO: Implement actual save to database
-        console.log('[Behavioral] Auto-saving STAR response:', starResponse)
-        await new Promise((resolve) => setTimeout(resolve, 300))
+        await fetch(`/api/interviews/${interviewId}/star`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ starResponse }),
+        })
       } catch (error) {
         console.error('[Behavioral] Failed to save:', error)
       } finally {
@@ -73,7 +102,7 @@ export function BehavioralWorkspace({ interviewId }: BehavioralWorkspaceProps) {
     }, 1000)
 
     return () => clearTimeout(saveTimer)
-  }, [starResponse, interviewId])
+  }, [starResponse, interviewId, isLoaded])
 
   const updateField = (field: keyof StarResponse, value: string) => {
     setStarResponse((prev) => ({ ...prev, [field]: value }))

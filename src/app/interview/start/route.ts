@@ -19,6 +19,16 @@ export async function GET(request: NextRequest) {
     console.log('[INTERVIEW START] Pathname:', request.nextUrl.pathname)
     console.log('[INTERVIEW START] Search params:', request.nextUrl.searchParams.toString())
 
+    // Check for mobile devices - redirect to dashboard with message
+    const userAgent = request.headers.get('user-agent') || ''
+    const isMobile = /iPhone|iPad|iPod|Android|webOS|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+
+    if (isMobile) {
+      console.log('[INTERVIEW START] Mobile device detected, redirecting to dashboard')
+      const dashboardUrl = new URL('/dashboard?mobile=blocked', request.url)
+      return NextResponse.redirect(dashboardUrl)
+    }
+
     // 1. Authenticate user
     const { userId } = await auth()
     console.log('[INTERVIEW START] User ID:', userId)

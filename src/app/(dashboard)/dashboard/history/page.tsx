@@ -46,13 +46,13 @@ export default async function HistoryPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12 max-w-7xl">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 md:py-10 lg:py-12 max-w-6xl">
         {/* Header */}
-        <div className="mb-6 sm:mb-8 md:mb-10 lg:mb-12 text-center sm:text-left">
-          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-3 md:mb-4 leading-tight">
+        <div className="mb-8 md:mb-10 lg:mb-12">
+          <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-3 tracking-tight">
             Interview History
           </h1>
-          <p className="text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto sm:mx-0">
+          <p className="text-lg text-white/50 max-w-xl">
             Review all your past interview performances and track your progress
           </p>
         </div>
@@ -62,21 +62,19 @@ export default async function HistoryPage() {
           <PastInterviewsSection interviews={pastInterviews} />
         ) : (
           <div className="text-center py-12 sm:py-16">
-            <div className="bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 rounded-3xl p-8 sm:p-12 border-2 border-blue-200 dark:border-blue-500/30 max-w-2xl mx-auto">
-              <div className="mb-6">
-                <div className="w-20 h-20 mx-auto mb-6 bg-white dark:bg-white/10 rounded-2xl flex items-center justify-center">
-                  <span className="text-5xl">📊</span>
-                </div>
-                <h3 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-3">
-                  No interviews yet
-                </h3>
-                <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                  Complete your first practice interview to start building your history and tracking your progress
-                </p>
+            <div className="bg-white/[0.03] border border-white/10 rounded-2xl p-8 sm:p-12 max-w-2xl mx-auto">
+              <div className="w-16 h-16 mx-auto mb-6 bg-white/5 rounded-2xl flex items-center justify-center">
+                <span className="text-4xl">📊</span>
               </div>
+              <h3 className="text-xl sm:text-2xl font-bold text-white mb-3">
+                No interviews yet
+              </h3>
+              <p className="text-white/50 mb-8 max-w-md mx-auto">
+                Complete your first practice interview to start building your history and tracking your progress
+              </p>
               <a
                 href="/dashboard"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-xl transition-colors"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-white text-black font-medium rounded-xl hover:bg-white/90 transition-colors"
               >
                 Start Your First Interview
               </a>

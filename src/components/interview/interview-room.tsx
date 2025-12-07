@@ -8,6 +8,7 @@ import { InterviewTimer } from './interview-timer'
 import { InterviewChat } from './interview-chat'
 import { InterviewWorkspace } from './interview-workspace'
 import { UserCamera } from './user-camera'
+import { AICoach } from './ai-coach'
 import { Button } from '@/components/ui/button'
 import { LogOut, ChevronDown, ChevronUp } from 'lucide-react'
 import { InterviewRecorder } from './interview-recorder'
@@ -46,8 +47,25 @@ export function InterviewRoom({
   const [isRunningCode, setIsRunningCode] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isOutputExpanded, setIsOutputExpanded] = useState(false)
+  const [elapsedMinutes, setElapsedMinutes] = useState(0)
+  const [workspaceCode, setWorkspaceCode] = useState('')
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
+
+  // Track elapsed time for AI coach
+  useEffect(() => {
+    const startTime = new Date(startedAt).getTime()
+    const updateElapsed = () => {
+      const now = Date.now()
+      const elapsed = (now - startTime) / 60000
+      setElapsedMinutes(elapsed)
+    }
+
+    updateElapsed()
+    const interval = setInterval(updateElapsed, 30000) // Update every 30 seconds
+
+    return () => clearInterval(interval)
+  }, [startedAt])
 
   // Detect screen size to conditionally render (not just hide) components
   useEffect(() => {
@@ -231,8 +249,10 @@ export function InterviewRoom({
             <InterviewWorkspace
               interviewId={interviewId}
               interviewType={interviewType}
+              scenario={scenario}
               onOutputChange={setCodeOutput}
               onRunningChange={setIsRunningCode}
+              onCodeChange={setWorkspaceCode}
             />
           </div>
 
@@ -299,6 +319,17 @@ export function InterviewRoom({
           </div>
         </div>
       </div>
+
+      {/* AI Coach - Real-time hints and guidance */}
+      {!isMobile && (
+        <AICoach
+          interviewType={interviewType}
+          transcript={transcript}
+          elapsedMinutes={elapsedMinutes}
+          totalMinutes={durationMinutes}
+          codeContent={workspaceCode}
+        />
+      )}
 
       {/* End Interview Confirmation Dialog */}
       <Dialog open={isEndDialogOpen} onOpenChange={setIsEndDialogOpen}>
