@@ -5,10 +5,15 @@ const isPublicRoute = createRouteMatcher([
   '/',
   '/sign-in(.*)',
   '/sign-up(.*)',
+  '/faq',                 // FAQ page - marketing/informational
+  '/terms',               // Terms of service
+  '/privacy',             // Privacy policy
+  '/contact',             // Contact page
   '/api/webhooks(.*)',
   '/api/text-to-speech',  // TTS is called from client, auth handled by session
   '/api/mux/webhook',     // Mux webhooks from external service
   '/api/newsletter',      // Newsletter signup from landing page
+  '/api/faq',             // FAQ AI endpoint - public for marketing
   '/interview/start(.*)', // TEMPORARY: Testing if Clerk is blocking this route
 ])
 
