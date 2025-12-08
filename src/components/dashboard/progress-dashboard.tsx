@@ -9,9 +9,6 @@ import {
   CartesianGrid,
   Tooltip,
   ResponsiveContainer,
-  BarChart,
-  Bar,
-  Cell,
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
@@ -21,7 +18,6 @@ import {
 import {
   TrendingUp,
   TrendingDown,
-  Minus,
   Target,
   Clock,
   Award,
@@ -90,8 +86,9 @@ export function ProgressDashboard({ interviews }: ProgressDashboardProps) {
     )
     const uniqueDates = [...new Set(dates)].sort()
     let streak = 0
-    const today = new Date().toDateString()
-    const yesterday = new Date(Date.now() - 86400000).toDateString()
+    const now = new Date()
+    const today = now.toDateString()
+    const yesterday = new Date(now.getTime() - 86400000).toDateString()
 
     if (uniqueDates.includes(today) || uniqueDates.includes(yesterday)) {
       streak = 1

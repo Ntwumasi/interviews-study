@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 
 interface TypingTextProps {
   text: string
@@ -10,6 +10,7 @@ interface TypingTextProps {
 }
 
 export function TypingText({ text, className = '', delay = 500, speed = 100 }: TypingTextProps) {
+  const mountedRef = useRef(false)
   const [mounted, setMounted] = useState(false)
   const [displayedText, setDisplayedText] = useState('')
   const [currentIndex, setCurrentIndex] = useState(0)
@@ -17,7 +18,11 @@ export function TypingText({ text, className = '', delay = 500, speed = 100 }: T
 
   // Handle mounting
   useEffect(() => {
+    mountedRef.current = true
     setMounted(true)
+    return () => {
+      mountedRef.current = false
+    }
   }, [])
 
   // Start typing after component mounts and initial delay

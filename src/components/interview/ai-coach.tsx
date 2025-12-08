@@ -266,7 +266,7 @@ export function AICoach({
           {currentHints.length === 0 ? (
             <div className="text-center py-4">
               <Target className="w-8 h-8 text-gray-600 mx-auto mb-2" />
-              <p className="text-sm text-gray-500">You're doing great!</p>
+              <p className="text-sm text-gray-500">You&apos;re doing great!</p>
               <p className="text-xs text-gray-600">Hints will appear as you progress</p>
             </div>
           ) : (

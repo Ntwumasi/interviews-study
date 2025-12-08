@@ -401,7 +401,7 @@ export function InterviewRoom({
                       Just Leave
                     </h3>
                     <p className="text-[13px] text-gray-500 mt-0.5">
-                      Exit without feedback - your progress won't be saved
+                      Exit without feedback - your progress won&apos;t be saved
                     </p>
                   </div>
                 </div>

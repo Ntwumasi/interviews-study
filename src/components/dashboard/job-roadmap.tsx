@@ -10,7 +10,6 @@ import {
   Code2,
   Network,
   MessageSquare,
-  Clock,
   BookOpen,
   CheckCircle2,
   ChevronDown,
@@ -276,7 +275,7 @@ export function JobRoadmap() {
               className="w-full bg-white/[0.04] border border-white/10 rounded-lg px-4 py-3 text-white focus:outline-none focus:border-purple-500/50"
             />
             <p className="text-xs text-white/40 mt-1">
-              We'll create a timeline to get you ready by this date
+              We&apos;ll create a timeline to get you ready by this date
             </p>
           </div>
 

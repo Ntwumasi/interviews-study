@@ -211,7 +211,7 @@ export function BehavioralWorkspace({ interviewId, scenario }: BehavioralWorkspa
             <ul className="space-y-1.5 text-[12px] text-gray-500">
               <li className="flex items-start gap-2">
                 <span className="text-purple-400 mt-0.5">•</span>
-                <span>Use "I" instead of "we" to highlight your specific contributions</span>
+                <span>Use &quot;I&quot; instead of &quot;we&quot; to highlight your specific contributions</span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-purple-400 mt-0.5">•</span>
