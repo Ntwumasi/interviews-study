@@ -12,6 +12,7 @@ import { AICoach } from './ai-coach'
 import { Button } from '@/components/ui/button'
 import { LogOut, ChevronDown, ChevronUp } from 'lucide-react'
 import { InterviewRecorder } from './interview-recorder'
+import { InterviewOnboarding } from './interview-onboarding'
 import {
   Dialog,
   DialogContent,
@@ -49,6 +50,8 @@ export function InterviewRoom({
   const [isOutputExpanded, setIsOutputExpanded] = useState(false)
   const [elapsedMinutes, setElapsedMinutes] = useState(0)
   const [workspaceCode, setWorkspaceCode] = useState('')
+  const [showOnboarding, setShowOnboarding] = useState(true)
+  const [interviewStarted, setInterviewStarted] = useState(false)
 
   const durationMinutes = DURATION_BY_TYPE[interviewType]
 
@@ -179,9 +182,9 @@ export function InterviewRoom({
     setIsEndDialogOpen(true)
   }
 
-  // Initial AI greeting
+  // Initial AI greeting - only after onboarding is complete
   useEffect(() => {
-    if (transcript.length === 0) {
+    if (interviewStarted && transcript.length === 0) {
       const greeting: TranscriptMessage = {
         role: 'assistant',
         content: `Hello! I'm your AI interviewer for today. We'll be working on: **${scenario.title}**\n\n${scenario.description}\n\nYou have ${durationMinutes} minutes for this ${interviewType.replace('_', ' ')} interview. Take a moment to read the problem, and when you're ready, feel free to start by clarifying requirements or sharing your initial thoughts.\n\nGood luck!`,
@@ -189,7 +192,12 @@ export function InterviewRoom({
       }
       setTranscript([greeting])
     }
-  }, [])
+  }, [interviewStarted])
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false)
+    setInterviewStarted(true)
+  }
 
   // Auto-expand output when code runs
   useEffect(() => {
@@ -205,6 +213,14 @@ export function InterviewRoom({
 
   return (
     <div className="h-screen flex flex-col bg-[#0f0f0f]">
+      {/* Onboarding Modal */}
+      {showOnboarding && (
+        <InterviewOnboarding
+          interviewType={interviewType}
+          onStart={handleOnboardingComplete}
+        />
+      )}
+
       {/* Minimal Header - Apple-inspired */}
       <header className="flex-shrink-0 h-12 border-b border-white/[0.08] bg-[#0f0f0f]/80 backdrop-blur-xl">
         <div className="h-full px-4 flex items-center justify-between">
