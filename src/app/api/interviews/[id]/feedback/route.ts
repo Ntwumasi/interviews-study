@@ -129,27 +129,62 @@ export async function POST(
     const feedback = parseFeedbackResponse(feedbackText)
 
     // 6. Save feedback to database
-    const { data: savedFeedback, error: saveError } = await supabaseAdmin
+    // Try with all columns first, fall back to core columns if new columns don't exist
+    const coreData = {
+      interview_id: interviewId,
+      overall_score: feedback.overall_score,
+      technical_accuracy: feedback.technical_accuracy,
+      communication: feedback.communication,
+      problem_solving: feedback.problem_solving,
+      strengths: feedback.strengths,
+      areas_for_improvement: feedback.areas_for_improvement,
+      detailed_feedback: feedback.detailed_feedback,
+    }
+
+    const fullData = {
+      ...coreData,
+      recommended_resources: feedback.recommended_resources,
+      next_steps: feedback.next_steps,
+    }
+
+    let savedFeedback = null
+    let saveError = null
+
+    // Try with full data first (includes recommended_resources and next_steps)
+    const fullResult = await supabaseAdmin
       .from('feedback')
-      .insert({
-        interview_id: interviewId,
-        overall_score: feedback.overall_score,
-        technical_accuracy: feedback.technical_accuracy,
-        communication: feedback.communication,
-        problem_solving: feedback.problem_solving,
-        strengths: feedback.strengths,
-        areas_for_improvement: feedback.areas_for_improvement,
-        detailed_feedback: feedback.detailed_feedback,
-        recommended_resources: feedback.recommended_resources,
-        next_steps: feedback.next_steps,
-      })
+      .insert(fullData)
       .select('id')
       .single()
 
+    if (fullResult.error) {
+      // If column doesn't exist, retry with core columns only
+      if (fullResult.error.message?.includes('column') || fullResult.error.code === '42703') {
+        console.warn('[Feedback] New columns not found, inserting with core columns only')
+        const coreResult = await supabaseAdmin
+          .from('feedback')
+          .insert(coreData)
+          .select('id')
+          .single()
+
+        savedFeedback = coreResult.data
+        saveError = coreResult.error
+      } else {
+        saveError = fullResult.error
+      }
+    } else {
+      savedFeedback = fullResult.data
+    }
+
     if (saveError || !savedFeedback) {
-      console.error('Failed to save feedback:', saveError)
+      console.error('[Feedback] Failed to save feedback:', {
+        error: saveError,
+        errorMessage: saveError?.message,
+        errorCode: saveError?.code,
+        interviewId,
+      })
       return NextResponse.json(
-        { error: 'Failed to save feedback' },
+        { error: 'Failed to save feedback', details: saveError?.message },
         { status: 500 }
       )
     }
