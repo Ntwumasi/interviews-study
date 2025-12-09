@@ -76,7 +76,7 @@ export function InterviewOnboarding({ interviewType, onStart }: InterviewOnboard
     {
       icon: CheckCircle,
       title: 'When you are done',
-      description: 'Click the Leave button in the top right corner, then choose Submit & Get Feedback to receive your personalized AI analysis.',
+      description: 'Click the Finish button in the top right corner, then choose Submit & Get Feedback to receive your personalized AI analysis.',
       highlight: 'submit',
     },
   ]

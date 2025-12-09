@@ -242,7 +242,7 @@ export function InterviewRoom({
             </div>
           </div>
 
-          {/* Right: Leave button only */}
+          {/* Right: Finish button */}
           <Button
             variant="ghost"
             size="sm"
@@ -251,7 +251,7 @@ export function InterviewRoom({
             className="h-8 px-3 text-gray-400 hover:text-white hover:bg-white/10 gap-1.5"
           >
             <LogOut className="h-3.5 w-3.5" />
-            <span className="text-[13px]">Leave</span>
+            <span className="text-[13px]">Finish</span>
           </Button>
         </div>
       </header>
@@ -352,7 +352,7 @@ export function InterviewRoom({
         <DialogContent className="bg-[#1a1a1a] border border-white/[0.08] max-w-md">
           <DialogHeader>
             <DialogTitle className="text-[17px] font-semibold text-white">
-              {timeUp ? "Time's Up" : 'Leave Interview?'}
+              {timeUp ? "Time's Up" : 'Finish Interview?'}
             </DialogTitle>
             <DialogDescription className="text-[14px] text-gray-400 leading-relaxed">
               {timeUp
@@ -386,7 +386,7 @@ export function InterviewRoom({
                 </div>
               </button>
 
-              {/* Option 2: Just Leave */}
+              {/* Option 2: Exit Without Feedback */}
               <button
                 onClick={() => handleConfirmEnd(false)}
                 disabled={isSubmitting}
@@ -398,10 +398,10 @@ export function InterviewRoom({
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-[14px] font-medium text-white group-hover:text-gray-300 transition-colors">
-                      Just Leave
+                      Exit Without Feedback
                     </h3>
                     <p className="text-[13px] text-gray-500 mt-0.5">
-                      Exit without feedback - your progress won&apos;t be saved
+                      Leave without saving - you won&apos;t receive feedback
                     </p>
                   </div>
                 </div>

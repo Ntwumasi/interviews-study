@@ -227,7 +227,7 @@ export function FeedbackDisplay({ interview, scenario, feedback: initialFeedback
       {/* Detailed Feedback */}
       <div className="bg-white/5 border border-white/10 rounded-lg p-6 mb-6">
         <h3 className="text-xl font-semibold text-white mb-4">Detailed Feedback</h3>
-        <div className="prose prose-invert prose-sm max-w-none prose-headings:text-gray-200 prose-p:text-gray-300 prose-strong:text-gray-200 prose-li:text-gray-300">
+        <div className="prose prose-invert prose-sm max-w-none prose-headings:text-gray-200 prose-p:text-gray-300 prose-strong:text-gray-200 prose-li:text-gray-300 prose-a:text-blue-400 [&>*]:text-gray-300">
           <ReactMarkdown>{feedback.detailed_feedback}</ReactMarkdown>
         </div>
       </div>
