@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import {
   Link2,
   FileText,
@@ -18,6 +18,10 @@ import {
   Building2,
   Briefcase,
   AlertCircle,
+  Bookmark,
+  BookmarkCheck,
+  Trash2,
+  FolderOpen,
 } from 'lucide-react'
 
 interface RoadmapTask {
@@ -80,6 +84,18 @@ interface Roadmap {
   tips: string[]
 }
 
+interface SavedRoadmap {
+  id: string
+  company: string
+  role: string
+  level: string | null
+  roadmap_data: Roadmap
+  job_url: string | null
+  target_date: string | null
+  created_at: string
+  updated_at: string
+}
+
 export function JobRoadmap() {
   const [inputMode, setInputMode] = useState<'url' | 'text'>('url')
   const [jobUrl, setJobUrl] = useState('')
@@ -90,9 +106,87 @@ export function JobRoadmap() {
   const [roadmap, setRoadmap] = useState<Roadmap | null>(null)
   const [expandedPhases, setExpandedPhases] = useState<Set<number>>(new Set([0]))
 
+  // Saved roadmaps state
+  const [savedRoadmaps, setSavedRoadmaps] = useState<SavedRoadmap[]>([])
+  const [isSaving, setIsSaving] = useState(false)
+  const [isSaved, setIsSaved] = useState(false)
+  const [showSavedRoadmaps, setShowSavedRoadmaps] = useState(false)
+  const [isLoadingSaved, setIsLoadingSaved] = useState(false)
+
+  // Load saved roadmaps on mount
+  useEffect(() => {
+    loadSavedRoadmaps()
+  }, [])
+
+  const loadSavedRoadmaps = async () => {
+    setIsLoadingSaved(true)
+    try {
+      const response = await fetch('/api/roadmaps')
+      if (response.ok) {
+        const data = await response.json()
+        setSavedRoadmaps(data.roadmaps || [])
+      }
+    } catch (err) {
+      console.error('Failed to load saved roadmaps:', err)
+    } finally {
+      setIsLoadingSaved(false)
+    }
+  }
+
+  const handleSaveRoadmap = async () => {
+    if (!roadmap) return
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/roadmaps', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          roadmap,
+          jobUrl: inputMode === 'url' ? jobUrl : undefined,
+          targetDate: targetDate || undefined,
+        }),
+      })
+
+      if (response.ok) {
+        setIsSaved(true)
+        loadSavedRoadmaps() // Refresh the list
+      } else {
+        const data = await response.json()
+        setError(data.error || 'Failed to save roadmap')
+      }
+    } catch (err) {
+      setError('Failed to save roadmap')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  const handleDeleteRoadmap = async (id: string) => {
+    try {
+      const response = await fetch(`/api/roadmaps/${id}`, {
+        method: 'DELETE',
+      })
+
+      if (response.ok) {
+        setSavedRoadmaps(prev => prev.filter(r => r.id !== id))
+      }
+    } catch (err) {
+      console.error('Failed to delete roadmap:', err)
+    }
+  }
+
+  const handleLoadSavedRoadmap = (saved: SavedRoadmap) => {
+    setRoadmap(saved.roadmap_data)
+    setIsSaved(true)
+    setShowSavedRoadmaps(false)
+    setExpandedPhases(new Set([0]))
+  }
+
   const handleGenerate = async () => {
     setIsLoading(true)
     setError(null)
+    setIsSaved(false)
 
     try {
       const response = await fetch('/api/job-roadmap', {
@@ -201,7 +295,58 @@ export function JobRoadmap() {
             Paste a job URL to get a personalized preparation plan
           </p>
         </div>
+        {savedRoadmaps.length > 0 && !roadmap && (
+          <button
+            onClick={() => setShowSavedRoadmaps(!showSavedRoadmaps)}
+            className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-white/70 hover:text-white bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded-lg transition-colors"
+          >
+            <FolderOpen className="w-4 h-4" />
+            Saved ({savedRoadmaps.length})
+          </button>
+        )}
       </div>
+
+      {/* Saved Roadmaps List */}
+      {showSavedRoadmaps && savedRoadmaps.length > 0 && (
+        <div className="bg-white/[0.03] border border-white/10 rounded-xl p-4 space-y-3">
+          <h4 className="text-sm font-medium text-white/60 mb-3">Your Saved Roadmaps</h4>
+          <div className="space-y-2">
+            {savedRoadmaps.map((saved) => (
+              <div
+                key={saved.id}
+                className="flex items-center justify-between p-3 bg-white/[0.02] border border-white/[0.06] rounded-lg hover:bg-white/[0.04] transition-colors"
+              >
+                <button
+                  onClick={() => handleLoadSavedRoadmap(saved)}
+                  className="flex-1 flex items-center gap-3 text-left"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                    <Building2 className="w-5 h-5 text-purple-400" />
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-white">{saved.company}</div>
+                    <div className="text-xs text-white/50">{saved.role}</div>
+                  </div>
+                </button>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/40">
+                    {new Date(saved.created_at).toLocaleDateString()}
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      handleDeleteRoadmap(saved.id)
+                    }}
+                    className="p-2 text-white/40 hover:text-red-400 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Input Section */}
       {!roadmap && (
@@ -326,12 +471,35 @@ export function JobRoadmap() {
                   <span className="capitalize">{roadmap.level}</span>
                 </div>
               </div>
-              <button
-                onClick={() => setRoadmap(null)}
-                className="text-sm text-white/50 hover:text-white transition-colors"
-              >
-                New Search
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleSaveRoadmap}
+                  disabled={isSaving || isSaved}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${
+                    isSaved
+                      ? 'bg-green-500/20 text-green-400 border border-green-500/30'
+                      : 'bg-purple-500/20 text-purple-400 border border-purple-500/30 hover:bg-purple-500/30'
+                  } disabled:opacity-50`}
+                >
+                  {isSaving ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : isSaved ? (
+                    <BookmarkCheck className="w-4 h-4" />
+                  ) : (
+                    <Bookmark className="w-4 h-4" />
+                  )}
+                  {isSaved ? 'Saved' : 'Save'}
+                </button>
+                <button
+                  onClick={() => {
+                    setRoadmap(null)
+                    setIsSaved(false)
+                  }}
+                  className="text-sm text-white/50 hover:text-white transition-colors"
+                >
+                  New Search
+                </button>
+              </div>
             </div>
 
             {/* Tech Stack */}

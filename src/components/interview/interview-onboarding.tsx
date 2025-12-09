@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Volume2, MessageSquare, CheckCircle, ArrowRight, X } from 'lucide-react'
+import { Volume2, MessageSquare, CheckCircle, ArrowRight, X, Keyboard, Video } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { InterviewType } from '@/types'
 
@@ -50,9 +50,27 @@ export function InterviewOnboarding({ interviewType, onStart }: InterviewOnboard
       highlight: 'sound',
     },
     {
+      icon: Keyboard,
+      title: 'Respond via chat',
+      description: 'Type your responses in the chat panel on the right. The video is for your reference only - you don\'t need to speak out loud.',
+      highlight: 'chat',
+      extra: (
+        <div className="mt-4 flex items-center gap-4 justify-center">
+          <div className="flex items-center gap-2 px-3 py-2 bg-green-500/10 border border-green-500/20 rounded-lg">
+            <Keyboard className="w-4 h-4 text-green-400" />
+            <span className="text-sm text-green-400">Type to respond</span>
+          </div>
+          <div className="flex items-center gap-2 px-3 py-2 bg-white/5 border border-white/10 rounded-lg">
+            <Video className="w-4 h-4 text-gray-500" />
+            <span className="text-sm text-gray-500">Video is optional</span>
+          </div>
+        </div>
+      ),
+    },
+    {
       icon: MessageSquare,
       title: 'Think out loud',
-      description: 'Explain your reasoning as you work. The AI evaluates your thought process, not just your final answer.',
+      description: 'Explain your reasoning as you type. The AI evaluates your thought process, not just your final answer.',
       highlight: 'communicate',
     },
     {
@@ -116,14 +134,16 @@ export function InterviewOnboarding({ interviewType, onStart }: InterviewOnboard
             {/* Step Icon */}
             <div className={`w-16 h-16 rounded-2xl flex items-center justify-center mb-4 ${
               currentStep === 0 ? 'bg-blue-500/20' :
-              currentStep === 1 ? 'bg-purple-500/20' :
+              currentStep === 1 ? 'bg-emerald-500/20' :
+              currentStep === 2 ? 'bg-purple-500/20' :
               'bg-green-500/20'
             }`}>
               {(() => {
                 const Icon = steps[currentStep].icon
                 return <Icon className={`w-8 h-8 ${
                   currentStep === 0 ? 'text-blue-400' :
-                  currentStep === 1 ? 'text-purple-400' :
+                  currentStep === 1 ? 'text-emerald-400' :
+                  currentStep === 2 ? 'text-purple-400' :
                   'text-green-400'
                 }`} />
               })()}
@@ -138,10 +158,13 @@ export function InterviewOnboarding({ interviewType, onStart }: InterviewOnboard
             <p className="text-gray-400 text-[15px] leading-relaxed max-w-sm">
               {steps[currentStep].description}
             </p>
+
+            {/* Extra content for chat clarification step */}
+            {'extra' in steps[currentStep] && steps[currentStep].extra}
           </div>
 
           {/* Interview-specific tip */}
-          {currentStep === 1 && (
+          {currentStep === 2 && (
             <div className="mt-6 p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
               <p className="text-sm text-gray-500 mb-1">Pro tip for {formattedType}:</p>
               <p className="text-sm text-gray-300">{tips.hint}</p>
@@ -149,7 +172,7 @@ export function InterviewOnboarding({ interviewType, onStart }: InterviewOnboard
           )}
 
           {/* Workspace tip on last step */}
-          {currentStep === 2 && (
+          {currentStep === 3 && (
             <div className="mt-6 p-4 bg-white/[0.03] rounded-xl border border-white/[0.06]">
               <p className="text-sm text-gray-500 mb-1">Your workspace:</p>
               <p className="text-sm text-gray-300">{tips.workspace}</p>
