@@ -423,7 +423,7 @@ function PricingSection() {
             </Button>
 
             <p className="text-center text-white/30 text-xs mt-4">
-              No credit card required to start. You&apos;ll only be charged after your trial ends.
+              You won&apos;t be charged until your 3-day trial ends. Cancel anytime.
             </p>
           </div>
         </div>
@@ -456,7 +456,7 @@ function FinalCTASection() {
               </Link>
             </Button>
             <span className="text-white/30 text-sm">
-              No credit card required
+              3-day free trial included
             </span>
           </div>
         </div>
@@ -540,9 +540,9 @@ export default function LandingPage() {
 
           {/* Trust indicators */}
           <div className="flex items-center justify-center gap-6 text-white/40 text-sm">
-            <span>3 free interviews</span>
+            <span>3-day free trial</span>
             <span className="w-1 h-1 bg-white/20 rounded-full" />
-            <span>No credit card</span>
+            <span>$19.99/month after</span>
             <span className="w-1 h-1 bg-white/20 rounded-full" />
             <span>Cancel anytime</span>
           </div>

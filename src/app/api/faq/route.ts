@@ -46,9 +46,10 @@ KEY FEATURES:
    - Tailored preparation for each company's interview style
 
 PRICING:
-- Free tier: 3 free interviews to start
-- No credit card required for signup
-- Premium plans available for unlimited access
+- Pro Plan: $19.99/month
+- 3-day free trial to start (credit card required)
+- Unlimited interviews, all company tracks, video recording
+- Cancel anytime during trial - no charge
 
 TECHNICAL:
 - Works best on desktop (coding/system design need larger screens)

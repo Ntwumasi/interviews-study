@@ -16,8 +16,8 @@ const faqs = [
         a: 'Our AI interviewer is powered by advanced language models that simulate a real interviewer. It asks contextual follow-up questions based on your responses, probes your thinking process, and adapts to your answers just like a human interviewer would. After each session, it provides detailed feedback on your performance.',
       },
       {
-        q: 'Is interviews.study free to use?',
-        a: 'We offer 3 free interviews to help you get started - no credit card required. This allows you to experience all three interview types and see if the platform is right for you. When you\'re ready, you can start a 3-day free trial of Pro ($19.99/month after trial) for unlimited access to all features.',
+        q: 'How much does interviews.study cost?',
+        a: 'We offer a 3-day free trial to get started. After your trial, Pro is $19.99/month for unlimited interviews, all company tracks, video recording, and more. You can cancel anytime during your trial and won\'t be charged. A credit card is required to start your trial so you can seamlessly continue if you love it.',
       },
       {
         q: 'What types of interviews can I practice?',
