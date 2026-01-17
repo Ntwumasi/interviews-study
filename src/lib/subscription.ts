@@ -86,15 +86,32 @@ export async function getOrCreateStripeCustomer(
   }
 
   // Get user from database
-  const { data: user, error: userError } = await supabaseAdmin
+  let { data: user, error: userError } = await supabaseAdmin
     .from('users')
     .select('id, stripe_customer_id')
     .eq('clerk_id', clerkUserId)
     .single()
 
+  // If user doesn't exist in Supabase, create them (handles race condition with Clerk)
   if (userError || !user) {
-    console.error('[Subscription] User not found:', userError)
-    return null
+    console.log('[Subscription] User not found, creating in Supabase:', clerkUserId)
+
+    const { data: newUser, error: createError } = await supabaseAdmin
+      .from('users')
+      .insert({
+        clerk_id: clerkUserId,
+        email: email,
+        name: name || null,
+      })
+      .select('id, stripe_customer_id')
+      .single()
+
+    if (createError || !newUser) {
+      console.error('[Subscription] Failed to create user:', createError)
+      return null
+    }
+
+    user = newUser
   }
 
   // If user already has a Stripe customer ID, return it
