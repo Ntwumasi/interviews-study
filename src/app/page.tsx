@@ -353,6 +353,85 @@ function ProductPreviewSection() {
   )
 }
 
+// Pricing section
+function PricingSection() {
+  const features = [
+    'Unlimited mock interviews',
+    'All company interview tracks',
+    'Coding, System Design & Behavioral',
+    'Real-time AI feedback',
+    'Video recording & playback',
+    'Job-specific roadmap generator',
+    'Priority support',
+  ]
+
+  return (
+    <section className="py-24 md:py-32">
+      <div className="container mx-auto px-6">
+        <div className="text-center mb-16">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 tracking-tight">
+            Simple, transparent pricing
+          </h2>
+          <p className="text-white/50 text-lg max-w-2xl mx-auto">
+            Start free, upgrade when you&apos;re ready to go all-in
+          </p>
+        </div>
+
+        <div className="max-w-lg mx-auto">
+          {/* Pricing card */}
+          <div className="relative bg-gradient-to-b from-white/[0.08] to-white/[0.03] border border-white/10 rounded-2xl p-8 md:p-10">
+            {/* Popular badge */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+              <div className="px-4 py-1.5 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-full text-white text-sm font-semibold shadow-lg">
+                Start with 3-day free trial
+              </div>
+            </div>
+
+            <div className="text-center mb-8 pt-4">
+              <h3 className="text-2xl font-bold text-white mb-2">Pro Plan</h3>
+              <div className="flex items-baseline justify-center gap-1">
+                <span className="text-5xl md:text-6xl font-bold text-white">$19.99</span>
+                <span className="text-white/50 text-lg">/month</span>
+              </div>
+              <p className="text-white/40 text-sm mt-2">
+                Cancel anytime. No questions asked.
+              </p>
+            </div>
+
+            <ul className="space-y-4 mb-8">
+              {features.map((feature, index) => (
+                <li key={index} className="flex items-center gap-3">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <svg className="w-3 h-3 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <span className="text-white/70">{feature}</span>
+                </li>
+              ))}
+            </ul>
+
+            <Button
+              size="lg"
+              className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white text-base py-6 h-auto font-semibold rounded-xl"
+              asChild
+            >
+              <Link href="/sign-up">
+                Start 3-Day Free Trial
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
+
+            <p className="text-center text-white/30 text-xs mt-4">
+              No credit card required to start. You&apos;ll only be charged after your trial ends.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+  )
+}
+
 // Final CTA section
 function FinalCTASection() {
   return (
@@ -494,6 +573,11 @@ export default function LandingPage() {
 
         {/* Testimonials */}
         <TestimonialsSection />
+
+        {/* Pricing */}
+        <div className="border-t border-white/10">
+          <PricingSection />
+        </div>
 
         {/* Newsletter */}
         <div className="border-t border-white/10">
