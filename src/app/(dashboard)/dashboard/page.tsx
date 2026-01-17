@@ -8,6 +8,7 @@ import { CompanyTracks } from '@/components/dashboard/company-tracks'
 import { JobRoadmap } from '@/components/dashboard/job-roadmap'
 import { SubscriptionStatus } from '@/components/dashboard/subscription-status'
 import { supabaseAdmin } from '@/lib/supabase'
+import { hasActiveSubscription } from '@/lib/subscription'
 
 const INTERVIEW_TYPES = [
   {
@@ -76,11 +77,25 @@ async function getPastInterviews(userId: string) {
   return interviews || []
 }
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ subscription?: string }>
+}) {
   const { userId } = await auth()
 
   if (!userId) {
     redirect('/sign-in')
+  }
+
+  // Check subscription status
+  const isSubscribed = await hasActiveSubscription(userId)
+  const params = await searchParams
+
+  // If not subscribed and not just returning from Stripe, redirect to subscribe
+  // Allow access if returning from successful subscription
+  if (!isSubscribed && params.subscription !== 'success') {
+    redirect('/subscribe')
   }
 
   const pastInterviews = await getPastInterviews(userId)
