@@ -465,132 +465,242 @@ function FinalCTASection() {
   )
 }
 
+// Mobile Landing Page - Simplified
+function MobileLandingPage() {
+  return (
+    <div className="min-h-screen bg-black px-6 py-8">
+      {/* Logo */}
+      <div className="flex justify-center mb-12">
+        <Logo size={32} />
+      </div>
+
+      {/* Hero */}
+      <div className="text-center mb-10">
+        <h1 className="text-4xl font-bold text-white mb-4 tracking-tight leading-tight">
+          Practice interviews.<br />
+          <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
+            Land offers.
+          </span>
+        </h1>
+        <p className="text-base text-white/50 mb-8">
+          AI-powered mock interviews for software engineers
+        </p>
+      </div>
+
+      {/* Desktop Required Notice */}
+      <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-5 mb-8">
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
+            <svg className="w-5 h-5 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-white mb-1">Desktop Required</h3>
+            <p className="text-xs text-white/60 leading-relaxed">
+              Mock interviews require a code editor and larger screen. Please visit on your computer to practice.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Simple Pricing */}
+      <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6 mb-8">
+        <div className="text-center mb-4">
+          <div className="text-xs font-medium text-emerald-400 mb-2">3-DAY FREE TRIAL</div>
+          <div className="flex items-baseline justify-center gap-1">
+            <span className="text-3xl font-bold text-white">$19.99</span>
+            <span className="text-white/50 text-sm">/month</span>
+          </div>
+        </div>
+        <ul className="space-y-2 text-sm text-white/60 mb-5">
+          <li className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Unlimited mock interviews
+          </li>
+          <li className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Coding, System Design & Behavioral
+          </li>
+          <li className="flex items-center gap-2">
+            <svg className="w-4 h-4 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+            </svg>
+            Real-time AI feedback
+          </li>
+        </ul>
+        <Button
+          className="w-full bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-semibold rounded-lg"
+          asChild
+        >
+          <Link href="/sign-up">
+            Start Free Trial
+            <ArrowRight className="w-4 h-4 ml-2" />
+          </Link>
+        </Button>
+        <p className="text-center text-white/30 text-xs mt-3">
+          Cancel anytime. No questions asked.
+        </p>
+      </div>
+
+      {/* Sign in link */}
+      <div className="text-center">
+        <Link href="/sign-in" className="text-white/50 text-sm hover:text-white transition-colors">
+          Already have an account? <span className="text-white">Sign in</span>
+        </Link>
+      </div>
+
+      {/* Minimal Footer */}
+      <div className="mt-12 pt-6 border-t border-white/10 text-center">
+        <p className="text-white/30 text-xs">
+          &copy; {new Date().getFullYear()} Kodedit LLC
+        </p>
+        <div className="flex justify-center gap-4 mt-2">
+          <Link href="/terms" className="text-white/30 text-xs hover:text-white/50">Terms</Link>
+          <Link href="/privacy" className="text-white/30 text-xs hover:text-white/50">Privacy</Link>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black relative">
-      {/* Animated grid background - fixed to viewport */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <AnimatedGridBackground />
-        {/* Noise texture */}
-        <div
-          className="absolute inset-0 opacity-[0.015]"
-          style={{
-            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
-          }}
-          aria-hidden="true"
-        />
+      {/* Mobile Layout - Simple */}
+      <div className="md:hidden">
+        <MobileLandingPage />
       </div>
 
-      {/* Navigation */}
-      <nav className="relative z-50 container mx-auto px-6 py-6" role="navigation" aria-label="Main navigation">
-        <div className="flex items-center justify-between">
-          <Link href="/">
-            <Logo size={38} />
-          </Link>
-          <div className="flex items-center gap-6">
-            <Link href="/sign-in" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
-              Sign in
+      {/* Desktop Layout - Full */}
+      <div className="hidden md:block">
+        {/* Animated grid background - fixed to viewport */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden">
+          <AnimatedGridBackground />
+          {/* Noise texture */}
+          <div
+            className="absolute inset-0 opacity-[0.015]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+            }}
+            aria-hidden="true"
+          />
+        </div>
+
+        {/* Navigation */}
+        <nav className="relative z-50 container mx-auto px-6 py-6" role="navigation" aria-label="Main navigation">
+          <div className="flex items-center justify-between">
+            <Link href="/">
+              <Logo size={38} />
             </Link>
-            <Button
-              className="bg-white text-black hover:bg-white/90 text-sm font-semibold rounded-full px-5"
-              asChild
-            >
-              <Link href="/sign-up">Get started</Link>
-            </Button>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <header className="relative z-10 container mx-auto px-6 pt-20 pb-24 md:pt-32 md:pb-32">
-        <div className="max-w-4xl mx-auto text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8">
-            <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-            <span className="text-white/60 text-sm font-medium">Trusted by engineers at top companies</span>
-          </div>
-
-          {/* Main headline */}
-          <h1 className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-[0.95]">
-            Practice interviews.<br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
-              Land offers.
-            </span>
-          </h1>
-
-          {/* Subheadline */}
-          <p className="text-lg md:text-xl text-white/50 mb-10 max-w-2xl mx-auto leading-relaxed">
-            AI-powered mock interviews for coding, system design, and behavioral.
-            Get real feedback. Build real confidence.
-          </p>
-
-          {/* CTA */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
-            <Button
-              size="lg"
-              className="bg-white text-black hover:bg-white/90 text-base px-8 py-6 h-auto font-semibold rounded-full"
-              asChild
-            >
-              <Link href="/sign-up">
-                Start practicing free
-                <ArrowRight className="w-4 h-4 ml-2" />
+            <div className="flex items-center gap-6">
+              <Link href="/sign-in" className="text-white/60 hover:text-white text-sm font-medium transition-colors">
+                Sign in
               </Link>
-            </Button>
+              <Button
+                className="bg-white text-black hover:bg-white/90 text-sm font-semibold rounded-full px-5"
+                asChild
+              >
+                <Link href="/sign-up">Get started</Link>
+              </Button>
+            </div>
+          </div>
+        </nav>
+
+        {/* Hero Section */}
+        <header className="relative z-10 container mx-auto px-6 pt-32 pb-32">
+          <div className="max-w-4xl mx-auto text-center">
+            {/* Badge */}
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 rounded-full mb-8">
+              <span className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-white/60 text-sm font-medium">Trusted by engineers at top companies</span>
+            </div>
+
+            {/* Main headline */}
+            <h1 className="text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight leading-[0.95]">
+              Practice interviews.<br />
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-emerald-600">
+                Land offers.
+              </span>
+            </h1>
+
+            {/* Subheadline */}
+            <p className="text-xl text-white/50 mb-10 max-w-2xl mx-auto leading-relaxed">
+              AI-powered mock interviews for coding, system design, and behavioral.
+              Get real feedback. Build real confidence.
+            </p>
+
+            {/* CTA */}
+            <div className="flex items-center justify-center gap-4 mb-6">
+              <Button
+                size="lg"
+                className="bg-white text-black hover:bg-white/90 text-base px-8 py-6 h-auto font-semibold rounded-full"
+                asChild
+              >
+                <Link href="/sign-up">
+                  Start practicing free
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Link>
+              </Button>
+            </div>
+
+            {/* Trust indicators */}
+            <div className="flex items-center justify-center gap-6 text-white/40 text-sm">
+              <span>3-day free trial</span>
+              <span className="w-1 h-1 bg-white/20 rounded-full" />
+              <span>$19.99/month after</span>
+              <span className="w-1 h-1 bg-white/20 rounded-full" />
+              <span>Cancel anytime</span>
+            </div>
+          </div>
+        </header>
+
+        {/* Company logos */}
+        <section className="relative z-10 container mx-auto px-6 pb-24">
+          <p className="text-center text-white/30 text-sm mb-8 uppercase tracking-wider font-medium">
+            Engineers preparing for
+          </p>
+          <CompanyLogos />
+        </section>
+
+        {/* Content sections */}
+        <div className="relative z-10">
+          {/* Stats */}
+          <StatsSection />
+
+          {/* Interview types */}
+          <InterviewTypesSection />
+
+          {/* Product preview */}
+          <ProductPreviewSection />
+
+          {/* How it works */}
+          <HowItWorksSection />
+
+          {/* Testimonials */}
+          <TestimonialsSection />
+
+          {/* Pricing */}
+          <div className="border-t border-white/10">
+            <PricingSection />
           </div>
 
-          {/* Trust indicators */}
-          <div className="flex items-center justify-center gap-6 text-white/40 text-sm">
-            <span>3-day free trial</span>
-            <span className="w-1 h-1 bg-white/20 rounded-full" />
-            <span>$19.99/month after</span>
-            <span className="w-1 h-1 bg-white/20 rounded-full" />
-            <span>Cancel anytime</span>
+          {/* Newsletter */}
+          <div className="border-t border-white/10">
+            <NewsletterSignup />
           </div>
-        </div>
-      </header>
 
-      {/* Company logos */}
-      <section className="relative z-10 container mx-auto px-6 pb-24">
-        <p className="text-center text-white/30 text-sm mb-8 uppercase tracking-wider font-medium">
-          Engineers preparing for
-        </p>
-        <CompanyLogos />
-      </section>
+          {/* Final CTA */}
+          <div className="border-t border-white/10">
+            <FinalCTASection />
+          </div>
 
-      {/* Content sections */}
-      <div className="relative z-10">
-        {/* Stats */}
-        <StatsSection />
-
-        {/* Interview types */}
-        <InterviewTypesSection />
-
-        {/* Product preview */}
-        <ProductPreviewSection />
-
-        {/* How it works */}
-        <HowItWorksSection />
-
-        {/* Testimonials */}
-        <TestimonialsSection />
-
-        {/* Pricing */}
-        <div className="border-t border-white/10">
-          <PricingSection />
-        </div>
-
-        {/* Newsletter */}
-        <div className="border-t border-white/10">
-          <NewsletterSignup />
-        </div>
-
-        {/* Final CTA */}
-        <div className="border-t border-white/10">
-          <FinalCTASection />
-        </div>
-
-        {/* Footer */}
-        <footer className="border-t border-white/10">
+          {/* Footer */}
+          <footer className="border-t border-white/10">
         <div className="container mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-12">
             {/* Brand */}
@@ -674,8 +784,9 @@ export default function LandingPage() {
               Twitter
             </a>
           </div>
+          </div>
+        </footer>
         </div>
-      </footer>
       </div>
 
       {/* Structured Data for SEO */}
