@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '@/lib/supabase'
 import { InterviewType } from '@/types'
+import { checkRateLimit, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit'
 
 // Increase timeout for AI feedback generation (max 60s on Vercel Pro, 10s on Hobby)
 export const maxDuration = 60
@@ -27,6 +28,15 @@ export async function POST(
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(`feedback:${userId}`, RATE_LIMITS.feedback)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many feedback requests. Please wait before trying again.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
       )
     }
 

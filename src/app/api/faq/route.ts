@@ -1,5 +1,6 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { checkRateLimit, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic()
 
@@ -60,8 +61,20 @@ SUPPORT:
 - Privacy questions: privacy@kodedit.io
 `
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // Rate limit by IP for unauthenticated endpoint
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown'
+    const rateLimitResult = checkRateLimit(`faq:${ip}`, RATE_LIMITS.faq)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many questions. Please wait before asking more.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      )
+    }
+
     const { question } = await request.json()
 
     if (!question || typeof question !== 'string') {

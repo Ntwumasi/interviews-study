@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { auth } from '@clerk/nextjs/server'
+import { auth, clerkClient } from '@clerk/nextjs/server'
 import { supabaseAdmin } from '@/lib/supabase'
 import { InterviewType, DifficultyLevel, Scenario } from '@/types'
 import { ANALYTICS_EVENTS, trackEvent, InterviewStartedProps } from '@/types/analytics'
@@ -87,14 +87,27 @@ export async function GET(request: NextRequest) {
     if (userFetchError) {
       if (userFetchError.code === 'PGRST116') {
         // User doesn't exist, create them
-        // Note: In production, this should be handled by a Clerk webhook
-        // For now, we'll create a basic user record
+        // Fetch user details from Clerk
+        let userEmail = ''
+        let userName: string | null = null
+        try {
+          const client = await clerkClient()
+          const clerkUser = await client.users.getUser(userId)
+          userEmail = clerkUser.emailAddresses[0]?.emailAddress || ''
+          userName = clerkUser.firstName
+            ? `${clerkUser.firstName}${clerkUser.lastName ? ' ' + clerkUser.lastName : ''}`
+            : null
+        } catch (clerkError) {
+          console.error('Failed to fetch user from Clerk:', clerkError)
+          // Continue with empty email - better than failing the interview start
+        }
+
         const { data: newUser, error: userCreateError } = await supabaseAdmin
           .from('users')
           .insert({
             clerk_id: userId,
-            email: 'user@example.com', // TODO: Get from Clerk
-            name: null,
+            email: userEmail,
+            name: userName,
           })
           .select('id')
           .single()

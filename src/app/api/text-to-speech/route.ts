@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { auth } from '@clerk/nextjs/server'
+import { checkRateLimit, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit'
 
 /**
  * POST /api/text-to-speech
@@ -6,6 +8,20 @@ import { NextRequest, NextResponse } from 'next/server'
  */
 export async function POST(request: NextRequest) {
   try {
+    // Rate limit by user if authenticated, otherwise by IP
+    const { userId } = await auth()
+    const ip = request.headers.get('x-forwarded-for')?.split(',')[0] ||
+               request.headers.get('x-real-ip') ||
+               'unknown'
+    const identifier = userId ? `tts:${userId}` : `tts:${ip}`
+    const rateLimitResult = checkRateLimit(identifier, RATE_LIMITS.textToSpeech)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many text-to-speech requests. Please wait.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      )
+    }
+
     const { text } = await request.json()
 
     if (!text) {

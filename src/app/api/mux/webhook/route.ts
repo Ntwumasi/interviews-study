@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase'
+import { muxClient } from '@/lib/mux'
+import crypto from 'crypto'
 
 // Mux webhook event types we care about
 type MuxWebhookEvent = {
@@ -17,9 +19,65 @@ type MuxWebhookEvent = {
   }
 }
 
+/**
+ * Verify Mux webhook signature
+ * @see https://docs.mux.com/guides/listen-for-webhooks#verify-webhook-signatures
+ */
+function verifyMuxSignature(rawBody: string, signature: string, secret: string): boolean {
+  // Parse the signature header: t=timestamp,v1=signature
+  const parts = signature.split(',')
+  const timestampPart = parts.find(p => p.startsWith('t='))
+  const signaturePart = parts.find(p => p.startsWith('v1='))
+
+  if (!timestampPart || !signaturePart) {
+    return false
+  }
+
+  const timestamp = timestampPart.substring(2)
+  const expectedSignature = signaturePart.substring(3)
+
+  // Create the signed payload
+  const signedPayload = `${timestamp}.${rawBody}`
+
+  // Compute HMAC with SHA256
+  const computedSignature = crypto
+    .createHmac('sha256', secret)
+    .update(signedPayload)
+    .digest('hex')
+
+  // Compare signatures (timing-safe)
+  try {
+    return crypto.timingSafeEqual(
+      Buffer.from(expectedSignature, 'hex'),
+      Buffer.from(computedSignature, 'hex')
+    )
+  } catch {
+    return false
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
-    const body: MuxWebhookEvent = await request.json()
+    // Get raw body for signature verification
+    const rawBody = await request.text()
+    const body: MuxWebhookEvent = JSON.parse(rawBody)
+
+    // Verify webhook signature if secret is configured
+    const webhookSecret = process.env.MUX_WEBHOOK_SECRET
+    if (webhookSecret) {
+      const signature = request.headers.get('mux-signature')
+      if (!signature) {
+        console.warn('[Mux Webhook] Missing signature header')
+        return NextResponse.json({ error: 'Missing signature' }, { status: 401 })
+      }
+
+      if (!verifyMuxSignature(rawBody, signature, webhookSecret)) {
+        console.error('[Mux Webhook] Signature verification failed')
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
+      }
+    } else {
+      console.warn('[Mux Webhook] MUX_WEBHOOK_SECRET not configured - webhook signature verification disabled')
+    }
     const { type, data } = body
 
     console.log(`[Mux Webhook] Received event: ${type}`)

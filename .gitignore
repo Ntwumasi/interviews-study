@@ -44,3 +44,10 @@ next-env.d.ts
 CLAUDE_CODE_PROMPTS.md
 PROJECT.md
 QUICKSTART.md
+
+# Environment variables (secrets stored in Vercel)
+.env.local
+.env.production
+.env.development.local
+.env.test.local
+.env.production.local

@@ -6,6 +6,7 @@ import { PastInterviewsSection } from '@/components/dashboard/past-interviews-se
 import { ProgressChart } from '@/components/dashboard/progress-chart'
 import { CompanyTracks } from '@/components/dashboard/company-tracks'
 import { JobRoadmap } from '@/components/dashboard/job-roadmap'
+import { SubscriptionStatus } from '@/components/dashboard/subscription-status'
 import { supabaseAdmin } from '@/lib/supabase'
 
 const INTERVIEW_TYPES = [
@@ -122,6 +123,11 @@ export default async function DashboardPage() {
           <p className="text-lg text-white/50 max-w-xl">
             Select an interview type and difficulty level to start practicing
           </p>
+        </div>
+
+        {/* Subscription Status */}
+        <div className="mb-8">
+          <SubscriptionStatus />
         </div>
 
         {/* Desktop: Interview Type Cards */}

@@ -17,7 +17,7 @@ const faqs = [
       },
       {
         q: 'Is interviews.study free to use?',
-        a: 'We offer 3 free interviews to help you get started - no credit card required. This allows you to experience all three interview types and see if the platform is right for you before upgrading to a premium plan for unlimited access.',
+        a: 'We offer 3 free interviews to help you get started - no credit card required. This allows you to experience all three interview types and see if the platform is right for you. When you\'re ready, you can start a 3-day free trial of Pro ($19.99/month after trial) for unlimited access to all features.',
       },
       {
         q: 'What types of interviews can I practice?',
@@ -134,7 +134,7 @@ const faqs = [
     questions: [
       {
         q: 'How do I upgrade to premium?',
-        a: 'You can upgrade to premium from your dashboard. Premium gives you unlimited interview sessions, access to all company-specific tracks, the job roadmap generator, and priority feedback generation.',
+        a: 'You can start a 3-day free trial from your dashboard - no charge until the trial ends. After the trial, Pro costs $19.99/month and includes unlimited interview sessions, access to all company-specific tracks, the job roadmap generator, and priority feedback generation. Cancel anytime.',
       },
       {
         q: 'How do I cancel my subscription?',

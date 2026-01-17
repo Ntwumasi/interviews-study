@@ -3,6 +3,7 @@ import { auth } from '@clerk/nextjs/server'
 import Anthropic from '@anthropic-ai/sdk'
 import { supabaseAdmin } from '@/lib/supabase'
 import { TranscriptMessage, InterviewType } from '@/types'
+import { checkRateLimit, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit'
 
 const anthropic = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
@@ -26,6 +27,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
+      )
+    }
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(`ai-interviewer:${userId}`, RATE_LIMITS.aiInterviewer)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many requests. Please wait before sending more messages.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
       )
     }
 

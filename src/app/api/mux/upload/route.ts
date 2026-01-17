@@ -28,10 +28,20 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate app URL is configured (required for secure CORS)
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL
+    if (!appUrl) {
+      console.error('[Mux Upload] NEXT_PUBLIC_APP_URL not configured')
+      return NextResponse.json(
+        { error: 'Video upload is not properly configured' },
+        { status: 500 }
+      )
+    }
+
     // Create a direct upload URL
     // This allows the browser to upload directly to Mux without going through our server
     const upload = await muxClient.video.uploads.create({
-      cors_origin: process.env.NEXT_PUBLIC_APP_URL || '*',
+      cors_origin: appUrl,
       new_asset_settings: {
         playback_policy: ['public'],
         // Store interview ID in passthrough for webhook identification

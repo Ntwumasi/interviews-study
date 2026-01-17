@@ -11,6 +11,7 @@ import {
   Network,
   MessageSquare,
 } from 'lucide-react'
+import { UpgradeModal } from './upgrade-modal'
 
 interface CompanyTrack {
   id: string
@@ -134,10 +135,13 @@ const TYPE_ICONS = {
 export function CompanyTracks({ completedInterviews = {} }: CompanyTracksProps) {
   const router = useRouter()
   const [selectedTrack, setSelectedTrack] = useState<string | null>(null)
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false)
+  const [upgradeFeatureName, setUpgradeFeatureName] = useState<string | undefined>()
 
   const handleStartTrack = (track: CompanyTrack, type: 'coding' | 'system_design' | 'behavioral') => {
     if (track.isPremium) {
-      // TODO: Show upgrade modal
+      setUpgradeFeatureName(`${track.name} Interview Track`)
+      setShowUpgradeModal(true)
       return
     }
     // Navigate to interview start with company context
@@ -283,6 +287,12 @@ export function CompanyTracks({ completedInterviews = {} }: CompanyTracksProps) 
           )
         })}
       </div>
+
+      <UpgradeModal
+        open={showUpgradeModal}
+        onOpenChange={setShowUpgradeModal}
+        featureName={upgradeFeatureName}
+      />
     </div>
   )
 }

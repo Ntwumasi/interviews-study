@@ -1,6 +1,8 @@
 import { auth } from '@clerk/nextjs/server'
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server'
 import Anthropic from '@anthropic-ai/sdk'
+import { checkRateLimit, rateLimitHeaders, RATE_LIMITS } from '@/lib/rate-limit'
+import { hasActiveSubscription } from '@/lib/subscription'
 
 const anthropic = new Anthropic()
 
@@ -40,12 +42,30 @@ async function fetchJobDescription(url: string): Promise<string> {
   }
 }
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const { userId } = await auth()
 
     if (!userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    // Check for premium subscription
+    const isPremium = await hasActiveSubscription(userId)
+    if (!isPremium) {
+      return NextResponse.json(
+        { error: 'Premium subscription required', code: 'PREMIUM_REQUIRED' },
+        { status: 402 }
+      )
+    }
+
+    // Rate limiting
+    const rateLimitResult = checkRateLimit(`job-roadmap:${userId}`, RATE_LIMITS.jobRoadmap)
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: 'Too many roadmap requests. Please wait before generating another.' },
+        { status: 429, headers: rateLimitHeaders(rateLimitResult) }
+      )
     }
 
     const { url, jobDescription, targetDate } = await request.json()

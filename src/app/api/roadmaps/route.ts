@@ -108,66 +108,106 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Check if user already has this roadmap saved (same company + role)
-    const { data: existing } = await supabaseAdmin
+    // Use upsert to atomically insert or update (prevents race conditions)
+    // This requires a unique constraint on (user_id, company, role) in the database
+    const { data: savedRoadmap, error: upsertError } = await supabaseAdmin
       .from('saved_roadmaps')
-      .select('id')
-      .eq('user_id', user.id)
-      .eq('company', roadmap.company)
-      .eq('role', roadmap.role)
-      .single()
-
-    if (existing) {
-      // Update existing roadmap
-      const { error: updateError } = await supabaseAdmin
-        .from('saved_roadmaps')
-        .update({
+      .upsert(
+        {
+          user_id: user.id,
+          company: roadmap.company,
+          role: roadmap.role,
+          level: roadmap.level || null,
           roadmap_data: roadmap,
           job_url: jobUrl || null,
           target_date: targetDate || null,
           updated_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id)
-
-      if (updateError) {
-        console.error('[Roadmaps] Failed to update:', updateError)
-        return NextResponse.json(
-          { error: 'Failed to update roadmap' },
-          { status: 500 }
-        )
-      }
-
-      return NextResponse.json({
-        message: 'Roadmap updated',
-        roadmapId: existing.id,
-        isUpdate: true,
-      })
-    }
-
-    // Insert new roadmap
-    const { data: savedRoadmap, error: insertError } = await supabaseAdmin
-      .from('saved_roadmaps')
-      .insert({
-        user_id: user.id,
-        company: roadmap.company,
-        role: roadmap.role,
-        level: roadmap.level || null,
-        roadmap_data: roadmap,
-        job_url: jobUrl || null,
-        target_date: targetDate || null,
-      })
+        },
+        {
+          onConflict: 'user_id,company,role',
+          ignoreDuplicates: false, // Update on conflict
+        }
+      )
       .select('id')
       .single()
 
-    if (insertError) {
-      console.error('[Roadmaps] Failed to save:', insertError)
+    if (upsertError) {
+      console.error('[Roadmaps] Failed to save:', upsertError)
       // Check if table doesn't exist
-      if (insertError.message?.includes('relation') || insertError.code === '42P01') {
+      if (upsertError.message?.includes('relation') || upsertError.code === '42P01') {
         return NextResponse.json(
           { error: 'Roadmap saving is not yet enabled. Please run the database migration.' },
           { status: 500 }
         )
       }
+      // If unique constraint doesn't exist, fall back to check-then-insert pattern
+      if (upsertError.code === '42P10' || upsertError.message?.includes('constraint')) {
+        // Fallback: Check if existing roadmap exists
+        const { data: existing } = await supabaseAdmin
+          .from('saved_roadmaps')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('company', roadmap.company)
+          .eq('role', roadmap.role)
+          .single()
+
+        if (existing) {
+          // Update existing roadmap
+          const { error: updateError } = await supabaseAdmin
+            .from('saved_roadmaps')
+            .update({
+              roadmap_data: roadmap,
+              job_url: jobUrl || null,
+              target_date: targetDate || null,
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', existing.id)
+
+          if (updateError) {
+            console.error('[Roadmaps] Failed to update:', updateError)
+            return NextResponse.json(
+              { error: 'Failed to update roadmap' },
+              { status: 500 }
+            )
+          }
+
+          return NextResponse.json({
+            message: 'Roadmap updated',
+            roadmapId: existing.id,
+            isUpdate: true,
+          })
+        }
+
+        // Insert new roadmap
+        const { data: newRoadmap, error: insertError } = await supabaseAdmin
+          .from('saved_roadmaps')
+          .insert({
+            user_id: user.id,
+            company: roadmap.company,
+            role: roadmap.role,
+            level: roadmap.level || null,
+            roadmap_data: roadmap,
+            job_url: jobUrl || null,
+            target_date: targetDate || null,
+          })
+          .select('id')
+          .single()
+
+        if (insertError) {
+          console.error('[Roadmaps] Failed to insert:', insertError)
+          return NextResponse.json(
+            { error: 'Failed to save roadmap' },
+            { status: 500 }
+          )
+        }
+
+        return NextResponse.json({
+          message: 'Roadmap saved',
+          roadmapId: newRoadmap.id,
+          isUpdate: false,
+        })
+      }
+
       return NextResponse.json(
         { error: 'Failed to save roadmap' },
         { status: 500 }
@@ -177,7 +217,6 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({
       message: 'Roadmap saved',
       roadmapId: savedRoadmap.id,
-      isUpdate: false,
     })
   } catch (error) {
     console.error('[Roadmaps] Error:', error)
